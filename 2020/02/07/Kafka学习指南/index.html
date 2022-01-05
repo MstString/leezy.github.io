@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.leezy.top","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="Kafka相关的技术知识，本文内容均基于 Ubuntu 18.04 虚拟机进行。说明，本文档共涉及6台服务器192.168.56.101 - kafka0192.168.56.102 - kafka1192.168.56.103 - kafka2192.168.56.104 - zookeeper0192.168.56.105 - zookeeper1192.168.56.106 - zookee">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kafka学习指南">
+<meta property="og:url" content="https://www.leezy.top/2020/02/07/Kafka%E5%AD%A6%E4%B9%A0%E6%8C%87%E5%8D%97/index.html">
+<meta property="og:site_name" content="SAKURA">
+<meta property="og:description" content="Kafka相关的技术知识，本文内容均基于 Ubuntu 18.04 虚拟机进行。说明，本文档共涉及6台服务器192.168.56.101 - kafka0192.168.56.102 - kafka1192.168.56.103 - kafka2192.168.56.104 - zookeeper0192.168.56.105 - zookeeper1192.168.56.106 - zookee">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://www.leezy.top/assets/blogImg/Kafka%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5.png">
+<meta property="og:image" content="https://www.leezy.top/assets/blogImg/Zookeeper%E5%AE%89%E8%A3%85.png">
+<meta property="og:image" content="https://www.leezy.top/assets/blogImg/Kafka%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F%E9%85%8D%E7%BD%AE.png">
+<meta property="og:image" content="https://www.leezy.top/assets/blogImg/Kafka%E6%96%B0%E5%BB%BAtopic.png">
+<meta property="og:image" content="https://www.leezy.top/assets/blogImg/Kafka%E7%94%9F%E4%BA%A7%E8%80%85%E5%8F%82%E6%95%B0.png">
+<meta property="og:image" content="https://www.leezy.top/assets/blogImg/Kafka%E6%B6%88%E8%B4%B9%E8%80%85%E5%8F%82%E6%95%B0.png">
+<meta property="og:image" content="https://www.leezy.top/assets/blogImg/Kafka%E5%88%86%E5%8C%BA%E8%AF%B4%E6%98%8E.png">
+<meta property="og:image" content="https://www.leezy.top/assets/blogImg/kafka_leader_election.png">
+<meta property="og:image" content="https://www.leezy.top/assets/blogImg/Kafka%E6%97%A5%E5%BF%97%E6%96%87%E4%BB%B6%E5%88%86%E7%B1%BB.png">
+<meta property="og:image" content="https://www.leezy.top/assets/blogImg/Kafka%E6%B6%88%E8%B4%B9%E8%80%85%E7%BB%84%E6%93%8D%E4%BD%9C.png">
+<meta property="article:published_time" content="2020-02-07T08:49:21.000Z">
+<meta property="article:modified_time" content="2021-12-08T14:26:00.419Z">
+<meta property="article:author" content="LEEZY">
+<meta property="article:tag" content="Docker">
+<meta property="article:tag" content="Kafka">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://www.leezy.top/assets/blogImg/Kafka%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5.png">
+
+<link rel="canonical" href="https://www.leezy.top/2020/02/07/Kafka%E5%AD%A6%E4%B9%A0%E6%8C%87%E5%8D%97/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Kafka学习指南 | SAKURA</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">SAKURA</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://www.leezy.top/2020/02/07/Kafka%E5%AD%A6%E4%B9%A0%E6%8C%87%E5%8D%97/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="LEEZY">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="SAKURA">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Kafka学习指南
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-02-07 16:49:21" itemprop="dateCreated datePublished" datetime="2020-02-07T16:49:21+08:00">2020-02-07</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-12-08 22:26:00" itemprop="dateModified" datetime="2021-12-08T22:26:00+08:00">2021-12-08</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>Kafka相关的技术知识，本文内容均基于 Ubuntu 18.04 虚拟机进行。说明，本文档共涉及6台服务器<br>192.168.56.101 - kafka0<br>192.168.56.102 - kafka1<br>192.168.56.103 - kafka2<br>192.168.56.104 - zookeeper0<br>192.168.56.105 - zookeeper1<br>192.168.56.106 - zookeeper2</p>
+<span id="more"></span>
+
+<p>Kafka将所有消息组织成多个topic的形式存储，而每个topic又可以拆分为多个partition，每个partition又由一个一个的消息组成，每个消息都被标识了一个递增的序列号代表其进来的先后顺序，并按照顺序存储到partition；</p>
+<ul>
+<li><p>producer选择一个topic，生产消息，消息会通过分配策略append到某个partition末尾</p>
+</li>
+<li><p>consumer选择一个topic, 通过id指定从那个位置开始消费消息。消费完成之后保留id，下次可以从这个位置开始继续消费，也可以从其他任意位置开始消费，这里的id即为offset。<br>一个典型的 Kafka 体系架构包括若干 Producer、若干 Broker、若干 Consumer，以及一个ZooKeeper集群，其中ZooKeeper是Kafka用来负责集群元数据的管理、控制器的选举等操作的。Producer将消息发送到Broker，Broker负责将收到的消息存储到磁盘中，而Consumer负责从Broker订阅并消费消息。</p>
+</li>
+</ul>
+<p><img src="/assets/blogImg/Kafka%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5.png" alt="Kafka基本概念"></p>
+<h1 id="Kafka的安装配置"><a href="#Kafka的安装配置" class="headerlink" title="Kafka的安装配置"></a>Kafka的安装配置</h1><h2 id="Ubuntu服务器环境下Kafka安装与配置"><a href="#Ubuntu服务器环境下Kafka安装与配置" class="headerlink" title="Ubuntu服务器环境下Kafka安装与配置"></a>Ubuntu服务器环境下Kafka安装与配置</h2><h3 id="Zookeeper安装与配置-standalone模式"><a href="#Zookeeper安装与配置-standalone模式" class="headerlink" title="Zookeeper安装与配置 - standalone模式"></a>Zookeeper安装与配置 - standalone模式</h3><ol>
+<li><p>首先安装JAVA环境，下载jdk tar.gz安装包，上传到<code>/usr/local</code>路径下，并执行<code>tar -zxvf jdk-8u241-linux-x64.tar.gz</code>解压。然后修改系统配置文件<code>vim /etc/profile</code>。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">export JAVA_HOME=/usr/local/jdk1.8.0_241</span><br><span class="line">export CLASSPATH=.:$&#123;JAVA_HOME&#125;/jre/lib/rt.jar:$&#123;JAVA_HOME&#125;/lib/dt.jar:$&#123;JAVA_HOME&#125;/lib/tools.jar</span><br><span class="line">export PATH=$PATH:$&#123;JAVA_HOME&#125;/bin</span><br></pre></td></tr></table></figure>
+<p>使得配置文件生效<code>source /etc/profile</code></p>
+</li>
+<li><p>下载zookeeper, <a target="_blank" rel="noopener" href="https://mirrors.cnnic.cn/apache/zookeeper/zookeeper-3.5.6/">这里</a>, 解压到<code>/usr/local/</code>, <code>tar -zxvf /usr/local/apache-zookeeper-3.5.6-bin.tar.gz</code>, 修改config目录下的<code>zoo_sample.cfg</code>重命名为<code>zoo.cfg</code></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> zk中的时间单元，zk中所有时间都以此时间单元为基准，进行整数倍配置</span></span><br><span class="line">tickTime=2000</span><br><span class="line"><span class="meta">#</span><span class="bash"> follower在启动过程中，会从leader同步所有最新数据，确定自己能够对外服务的起始状态。</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 当follower在initLimit个tickTime还没完成数据同步时，则leader认为follower连接失败。</span></span><br><span class="line">initLimit=10</span><br><span class="line"><span class="meta">#</span><span class="bash"> leader与Follower之间通信请求和应答的时间长度。</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 当leader在syncLimit个tickTime还没有收到follower的应答，则认为leader已下线。</span></span><br><span class="line">syncLimit=5</span><br><span class="line"><span class="meta">#</span><span class="bash"> 快照文件存储目录，如果不配置dataLogDir，则事务日志也会保存在这个目录（不推荐）</span></span><br><span class="line">dataDir=/opt/data/zookeeper/data</span><br><span class="line"><span class="meta">#</span><span class="bash"> 事务日志存储目录</span></span><br><span class="line">dataLogDir=/opt/data/zookeeper/logs</span><br><span class="line"><span class="meta">#</span><span class="bash"> zk对外提供服务端口</span></span><br><span class="line">clientPort=2181</span><br><span class="line"><span class="meta">#</span><span class="bash"> the maximum number of client connections.</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> increase this <span class="keyword">if</span> you need to handle more clients</span></span><br><span class="line">[[maxClientCnxns]]=60</span><br></pre></td></tr></table></figure>
+<p>修改zookeeper环境变量，节省操作步骤<code>vim /etc/profile</code></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">export ZOOKEEPER_HOME=/usr/local/apache-zookeeper-3.5.6</span><br><span class="line"><span class="meta">#</span><span class="bash"> 在文件的Path配置项里添加下列配置，注意有:号</span></span><br><span class="line">:$&#123;ZOOKEEPER_HOME&#125;/bin</span><br></pre></td></tr></table></figure>
+<p>更新环境变量<code>source /etc/profile</code>。启动Zookeeper<code>zkServer.sh start</code>。如果遇到<code>Permission denied</code>的问题就授权给zk的安装目录<code>chmod -R 755 /usr/local/apache-zookeeper-3.5.6/</code>。可以通过<code>zkServer.sh status</code>查看运行状态。通过<code>jps</code>可以看到zk对应的java进程。</p>
+</li>
+</ol>
+<p><img src="/assets/blogImg/Zookeeper%E5%AE%89%E8%A3%85.png" alt="Zookeeper安装"><br>还可以通过以下命令通过zk客户端进行连接。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 登录zk服务器</span></span><br><span class="line">zkCli.sh -server 127.0.0.1:2181</span><br></pre></td></tr></table></figure>
+<p>执行<code>ls /</code></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[zk: 127.0.0.1:2181(CONNECTED) 0] ls /</span><br><span class="line"><span class="meta">#</span><span class="bash"> 只有一个zookeeper节点</span></span><br><span class="line">[zookeeper]</span><br></pre></td></tr></table></figure>
+
+<h3 id="Zookeeper安装与配置-集群模式"><a href="#Zookeeper安装与配置-集群模式" class="headerlink" title="Zookeeper安装与配置 - 集群模式"></a>Zookeeper安装与配置 - 集群模式</h3><p>与单机模式类似，集群模式需要对机器进行映射。我本地有三台zk的虚拟机，单机的配置，这三台集群都要有。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">192.168.56.104 - zookeeper0</span><br><span class="line">192.168.56.105 - zookeeper1</span><br><span class="line">192.168.56.106 - zookeeper2</span><br></pre></td></tr></table></figure>
+<p>然后进入其中一台机器的ZooKeeper安装路径conf目录。这里我们选择先在<code>IP为192.168.56.104</code>的机器上进行配置，编辑<code>conf/zoo.cfg</code>文件，在该文件中添加以下配置：</p>
+<p><em>server.N=N-server-IP:A:B 其中N是一个数字, 表示这是第几号server，它的值和myid文件中的值对应。N-server-IP是第N个server所在的IP地址。A是配置该server和集群中的leader交换消息所使用的端口。B配置选举leader时服务器相互通信所使用的端口。</em></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 在每个zk的配置文件里都同时配置三台机器</span></span><br><span class="line">server.1=192.168.56.104:2888:3888</span><br><span class="line">server.2=192.168.56.105:2888:3888</span><br><span class="line">server.3=192.168.56.106:2888:3888</span><br></pre></td></tr></table></figure>
+<p>接着在<code>$&#123;dataDir&#125;</code>路径下创建一个<code>myid文件</code>。myid里存放的值就是<code>服务器的编号</code>，即对应上述公式中的<code>N</code>，在这里第一台机器myid存放的值为1。ZooKeeper在启动时会读取myid文件中的值与zoo.cfg文件中的配置信息进行比较，以确定是哪台服务器。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">cd /opt/data/zookeeper/data</span><br><span class="line">touch myid</span><br><span class="line">echo 1 &gt; myid</span><br></pre></td></tr></table></figure>
+<p>同理在其它两个机器上分别修改<code>zoo.cfg</code>以及<code>myid</code>文件。<br>然后在三台机器上分别执行<code>zkServer.sh start</code>以及<code>zkServer.sh status</code>, 打印出如下日志：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 192.168.56.104 - zookeeper0</span></span><br><span class="line">root@zookeeper0:/opt/data/zookeeper/data# zkServer.sh start</span><br><span class="line">ZooKeeper JMX enabled by default</span><br><span class="line">Using config: /usr/local/apache-zookeeper-3.5.6/bin/../conf/zoo.cfg</span><br><span class="line">Starting zookeeper ... STARTED</span><br><span class="line">root@zookeeper0:/opt/data/zookeeper/data# zkServer.sh status</span><br><span class="line">ZooKeeper JMX enabled by default</span><br><span class="line">Using config: /usr/local/apache-zookeeper-3.5.6/bin/../conf/zoo.cfg</span><br><span class="line">Client port found: 2181. Client address: localhost.</span><br><span class="line">Mode: follower</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 192.168.56.105 - zookeeper1</span></span><br><span class="line">root@zookeeper1:/opt/data/zookeeper/data# zkServer.sh start</span><br><span class="line">ZooKeeper JMX enabled by default</span><br><span class="line">Using config: /usr/local/apache-zookeeper-3.5.6/bin/../conf/zoo.cfg</span><br><span class="line">Starting zookeeper ... STARTED</span><br><span class="line">root@zookeeper1:/opt/data/zookeeper/data# zkServer.sh status</span><br><span class="line">ZooKeeper JMX enabled by default</span><br><span class="line">Using config: /usr/local/apache-zookeeper-3.5.6/bin/../conf/zoo.cfg</span><br><span class="line">Client port found: 2181. Client address: localhost.</span><br><span class="line">Mode: leader</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 192.168.56.106 - zookeeper2</span></span><br><span class="line"> ZooKeeper JMX enabled by default</span><br><span class="line">Using config: /usr/local/apache-zookeeper-3.5.6/bin/../conf/zoo.cfg</span><br><span class="line">Starting zookeeper ... STARTED</span><br><span class="line">root@zookeeper2:/opt/data/zookeeper/data# zkServer.sh status</span><br><span class="line">ZooKeeper JMX enabled by default</span><br><span class="line">Using config: /usr/local/apache-zookeeper-3.5.6/bin/../conf/zoo.cfg</span><br><span class="line">Client port found: 2181. Client address: localhost.</span><br><span class="line">Mode: follower</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>可以看到，这3台机器中，一台机器作为Leader，其他两台服务器作为Follower。</p>
+<h3 id="Kafka安装与配置-单机模式"><a href="#Kafka安装与配置-单机模式" class="headerlink" title="Kafka安装与配置 - 单机模式"></a>Kafka安装与配置 - 单机模式</h3><ol>
+<li><p>下载kafka, <a target="_blank" rel="noopener" href="https://mirrors.cnnic.cn/apache/zookeeper/zookeeper-3.5.6/">这里</a>, 解压到<code>/usr/local/</code>, <code>tar -zxvf /usr/local/kafka_2.13-2.4.0.tgz</code></p>
+</li>
+<li><p>配置环境变量, <code>vim /etc/profile</code>，按照下图配置后保存文件退出，执行source /etc/profile命令让刚才新增的Kafka环境变量设置生效。再在任一路径下输入kafka然后按Tab键，会提示补全Kafka运行相关脚本．sh文件，表示Kafka环境变量配置成功。</p>
+</li>
+</ol>
+<p><img src="/assets/blogImg/Kafka%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F%E9%85%8D%E7%BD%AE.png" alt="Kafka环境变量配置"></p>
+<ol start="3">
+<li>修改kafka配置，修改<code>$KAFKA_HOME/config</code>目录下的<code>server.properties</code>文件，为了便于后续集群环境搭建的配置，需要保证同一个集群下broker.id要唯一，因此这里手动配置<code>broker.id</code>，直接保持与zk的myid值一致，同时配置日志存储路径。server.properties修改的配置如下：<figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"># 指定的代理ID，由于是单机模式，这里指定zk节点id为<span class="number">1</span>，及zookeeper0那台机器。</span><br><span class="line">broker.id=<span class="number">1</span></span><br><span class="line"># 指定Log存储路径</span><br><span class="line"><span class="built_in">log</span>.dirs=/<span class="keyword">opt</span>/data/kafka-logs</span><br><span class="line"># 指定kafka的安装路径，由于我zk没和kafka安装在同一台机器上所以这里要修改。</span><br><span class="line">zookeeper.connect=<span class="number">192.168</span>.<span class="number">56.104</span>:<span class="number">2181</span></span><br></pre></td></tr></table></figure>
+修改完后，保存文件然后启动Kafka，进入Kafka安装路径$KAFKA_HOME/bin目录下，执行启动KafkaServer命令。<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> -daemon参数表示使程序以守护进程的方式后台运行</span></span><br><span class="line">kafka-server-start.sh -daemon /usr/local/kafka_2.13-2.4.0/config/server.properties</span><br></pre></td></tr></table></figure>
+执行jps命令查看Java进程，可以看到kafka的进程名，同时进入$KAFKA_HOME/logs目录下，查看server.log会看到KafkaServer启动日志，在启动日志中会记录KafkaServer启动时加载的配置信息。<br>此时登录<code>192.168.56.104</code>这台zk可以再次查看目录结构：<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">zkCli.sh -server 192.168.56.104:2181</span><br></pre></td></tr></table></figure>
+通过zk客户端登录<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 在Kafka启动之前ZooKeeper中只有一个zookeeper目录节点，Kafka启动后目录节点如下：</span></span><br><span class="line">[zk: 127.0.0.1:2181(CONNECTED) 0] ls /</span><br><span class="line">[admin, brokers, cluster, config, consumers, controller, controller_epoch, isr_change_notification, latest_producer_id_block, log_dir_event_notification, zookeeper]</span><br><span class="line"><span class="meta">#</span><span class="bash"> 查看当前已启动的Kafka代理节点：输出信息显示当前只有一个Kafka代理节点，当前代理的brokerId为1</span></span><br><span class="line">[zk: 127.0.0.1:2181(CONNECTED) 1] ls /brokers/ids</span><br><span class="line">[1]</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h3 id="Kafka安装与配置-集群模式"><a href="#Kafka安装与配置-集群模式" class="headerlink" title="Kafka安装与配置 - 集群模式"></a>Kafka安装与配置 - 集群模式</h3><p>集群与单机类似，这里只需修改<code>server.properties</code>文件中Kafka连接ZooKeeper的配置，将Kafka连接到ZooKeeper集群，配置格式为<code>ZooKeeper服务器IP:ZooKeeper的客户端端口</code>，多个ZooKeeper机器之间以逗号分隔开。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">zookeeper.connect=192.168.56.104:2181,192.168.56.105:2181,192.168.56.106:2181 </span><br></pre></td></tr></table></figure>
+<p>执行下列命令复制kafka整个目录：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">cd /usr/local</span><br><span class="line"># 复制文件到kafka1</span><br><span class="line">scp -r kafka_2.13-2.4.0 root@192.168.56.102:/usr/local/</span><br><span class="line"># 复制文件到kafka2</span><br><span class="line">scp -r kafka_2.13-2.4.0 root@192.168.56.103:/usr/local/</span><br></pre></td></tr></table></figure>
+<p>分别登录另外两台机器，修改<code>server.properties</code>文件中的<code>broker.id</code>依次为<code>2</code>和<code>3</code>, 并安装java环境，配置环境变量，同时也添加上述zk配置。<br>同样的，修改三台机器的<code>advertised.listeners=PLAINTEXT://your.host.name:9092</code>属性为具体的ip和端口。</p>
+<p><em>listeners：kafka的连接协议名、主机名和端口，如果没有配置，将使用java.net.InetAddress.getCanonicalHostName()的返回值作为主机名<br>advertised.listeners：生产者和消费者使用的主机名和端口，如果没有配置，将使用listeners的配置，如果listeners也没有配置，将使用java.net.InetAddress.getCanonicalHostName()的返回值</em><br>然后在3台机器上启动kafka</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kafka-server-start.sh -daemon /usr/local/kafka_2.13-2.4.0/config/server.properties</span><br></pre></td></tr></table></figure>
+<p>这个时候在任意一台zk服务器上执行<code>ls /brokers/ids</code>都会得到一下结果</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[zk: 127.0.0.1:2181(CONNECTED) 4] ls /brokers/ids</span><br><span class="line">[1, 2, 3]</span><br></pre></td></tr></table></figure>
+<h2 id="Docker环境安装与配置"><a href="#Docker环境安装与配置" class="headerlink" title="Docker环境安装与配置"></a>Docker环境安装与配置</h2><h3 id="镜像下载"><a href="#镜像下载" class="headerlink" title="镜像下载"></a>镜像下载</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">docker pull wurstmeister/zookeeper</span><br><span class="line"></span><br><span class="line">docker pull wurstmeister/kafka</span><br></pre></td></tr></table></figure>
+<h3 id="zookeeper容器启动"><a href="#zookeeper容器启动" class="headerlink" title="zookeeper容器启动"></a>zookeeper容器启动</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> -d参数 表示后台运行容器，并返回容器ID</span></span><br><span class="line">docker run -d --name zookeeper -p 2181:2181 -t wurstmeister/zookeeper</span><br><span class="line"><span class="meta">#</span><span class="bash"> 查看zk服务器目录结构</span></span><br><span class="line">ls /</span><br></pre></td></tr></table></figure>
+
+<h3 id="kafka容器启动"><a href="#kafka容器启动" class="headerlink" title="kafka容器启动"></a>kafka容器启动</h3><h4 id="单节点部署"><a href="#单节点部署" class="headerlink" title="单节点部署"></a>单节点部署</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 启动Kafka(注意 修改IP为镜像安装IP)</span></span><br><span class="line">docker run -d --name kafka \</span><br><span class="line">-p 9092:9092 \</span><br><span class="line">-e KAFKA_BROKER_ID=0 \</span><br><span class="line">-e KAFKA_ZOOKEEPER_CONNECT=192.168.56.101:2181 \</span><br><span class="line">-e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://192.168.56.101:9092 \</span><br><span class="line">-e KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9092 \</span><br><span class="line">-t wurstmeister/kafka</span><br></pre></td></tr></table></figure>
+<p>注意有以下四个参数：</p>
+<ul>
+<li>KAFKA_BROKER_ID=0</li>
+<li>KAFKA_ZOOKEEPER_CONNECT=<code>&lt;zookeeper IP&gt;</code>:<code>&lt;zookeeper port&gt;</code></li>
+<li>KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://<IP>:9092</li>
+<li>KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9092</li>
+</ul>
+<p>进入kafka容器内部</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">docker exec -it kafka /bin/bash</span><br><span class="line"><span class="meta">#</span><span class="bash"> 查看Kafka版本，进入Kafka所在目录</span></span><br><span class="line">cd /opt/kafka_2.12-2.4.0</span><br><span class="line"><span class="meta">#</span><span class="bash"> 启动消息发送方</span></span><br><span class="line">./bin/kafka-console-producer.sh --broker-list localhost:9092 --topic mykafka</span><br><span class="line"><span class="meta">#</span><span class="bash"> 启动消息接收方</span></span><br><span class="line">./bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic mykafka --from-beginning</span><br></pre></td></tr></table></figure>
+
+<h4 id="Kafka伪分布式环境部署"><a href="#Kafka伪分布式环境部署" class="headerlink" title="Kafka伪分布式环境部署"></a>Kafka伪分布式环境部署</h4><p>在同一台机器上启动多个Kafka Server 在单节点搭建的基础上再搭建一个节点，只需修改<code>KAFKA_BROKER_ID</code>以及<code>端口</code></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">docker run -d --name kafka1 \</span><br><span class="line">-p 9093:9093 \</span><br><span class="line"><span class="meta">#</span><span class="bash"> 修改broker_id</span></span><br><span class="line">-e KAFKA_BROKER_ID=1 \</span><br><span class="line">-e KAFKA_ZOOKEEPER_CONNECT=192.168.56.101:2181 \</span><br><span class="line"><span class="meta">#</span><span class="bash"> 修改端口</span></span><br><span class="line">-e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://192.168.56.101:9093 \</span><br><span class="line">-e KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9093 \</span><br><span class="line">-t wurstmeister/kafka</span><br></pre></td></tr></table></figure>
+
+<p>然后再在<code>/opt/kafka_2.12-2.4.0</code>目录下执行</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./bin/kafka-topics.sh --create --zookeeper 192.168.56.101:2181 --replication-factor 2 --partitions 2 --topic mytopic</span><br></pre></td></tr></table></figure>
+<p>查看topic状态 </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./bin/kafka-topics.sh --describe --zookeeper 192.168.56.101:2181 --topic mytopic</span><br></pre></td></tr></table></figure>
+<p>Isr表示存活的备份<br><img src="/assets/blogImg/Kafka%E6%96%B0%E5%BB%BAtopic.png" alt="Kafka新建topic"></p>
+<h2 id="Kafka-Manager安装"><a href="#Kafka-Manager安装" class="headerlink" title="Kafka Manager安装"></a>Kafka Manager安装</h2><p>下载kafka Manager<a target="_blank" rel="noopener" href="https://github.com/yahoo/CMAK">这里</a>，上传到<code>/usr/local</code>文件下，并解压<code>tar -zxvf CMAK-2.0.0.2.tar.gz</code>。Kafka Manager是用Scala语言开发的，通过sbt(Simple Build Tool)构建，sbt是对Scala或Java语言进行编译的一个工具，它类似于Maven, Gradle。需要通过以下方式进行源码编译</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">cd ./CMAK-2.0.0.2</span><br><span class="line"><span class="meta">#</span><span class="bash"> 此过程巨慢无比，推荐直接搜索打包好的kafka-manager</span></span><br><span class="line">./sbt clean dist</span><br></pre></td></tr></table></figure>
+<p>在下载了一晚上无果后，打开<code>/root/.sbt</code>看了看发现就下载了一个jar包，网上找了一份别人编译好的kafka-manager-2.0.0.2.zip。解压好上传，进行如下配置：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">cd /usr/local/kafka-manager-2.0.0.2/conf</span><br><span class="line">vim ./application.conf</span><br><span class="line"><span class="meta">#</span><span class="bash"> 修改以下配置为真正的zk集群地址，注意是修改倒数第二行的这个配置才可以生效</span></span><br><span class="line">kafka-manager.zkhosts=&quot;192.168.56.104:2181,192.168.56.105:2181,192.168.56.106:2181&quot;</span><br></pre></td></tr></table></figure>
+<p>修改<code>logback.xml</code>文件中的<code>$&#123;application.home&#125;</code>为<code>..</code>，即logs日志存储位置。启动kafka-manager</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 进入bin目录输入如下启动命令</span></span><br><span class="line">nohup ./kafka-manager -Dconfig.file=../conf/application.conf</span><br><span class="line"><span class="meta">#</span><span class="bash"> 权限不够</span></span><br><span class="line">chmod -R 755 ../../kafka-manager-2.0.0.2/</span><br></pre></td></tr></table></figure>
+<p>关闭Kafka Manager。Kafka Manager没有提供关闭操作的执行脚本及命令，当希望关闭Kafka Manager时，可直接通过kill命令强制杀掉Kafka Manager进程。查看Kafka Manager进程，输入jps命令，其中ProdServerStart即为Kafka Manager进程。通过kill命令关闭Kafka Manager。同时，由于Kafka Manager运行时有一个类似锁的文件<code>RUNNING_PID</code>，位于Kafka Manager安装路径bin同目录下，为了不影响下次启动，在执行kill命令后同时删除<code>RUNNING_PID</code>文件，<code>rm -f RUNNING_PID</code>.<br>完成以上配置后打开<code>http://192.168.56.101:9000/</code>即可。</p>
+<h1 id="Kafka概念说明"><a href="#Kafka概念说明" class="headerlink" title="Kafka概念说明"></a>Kafka概念说明</h1><h2 id="基础概念"><a href="#基础概念" class="headerlink" title="基础概念"></a>基础概念</h2><p>Kafka系统中有四种核心应用接口——生产者、消费者、数据流、连接器。</p>
+<h3 id="生产者"><a href="#生产者" class="headerlink" title="生产者"></a>生产者</h3><p>Kafka生产者可以理解成Kafka系统与外界进行数据交互的应用接口。生产者应用接口的作用是写入消息数据到Kafka中。Kafka系统提供了一系列的操作脚本，这些脚本放置在<code>$KAFKA_HOME/bin</code>目录中。其中，<code>kafka-console-producer.sh</code>脚本可用来作为生产者客户端。</p>
+<p>生产者属性如下：</p>
+<p><img src="/assets/blogImg/Kafka%E7%94%9F%E4%BA%A7%E8%80%85%E5%8F%82%E6%95%B0.png" alt="Kafka生产者参数"></p>
+<p>这里重点说明以下acks属性：</p>
+<ul>
+<li><p>当acks=0时，生产者不用等待代理返回确认信息，而连续发送消息。显然这种方式加快了消息投递的速度，然而无法保证消息是否已被代理接受，有可能存在丢失数据的风险。</p>
+</li>
+<li><p>当acsk=1时，生产者需要等待Leader副本已成功将消息写入日志文件中。这种方式在一定程度上降低了数据丢失的可能性，但仍无法保证数据一定不会丢失。如果在Leader副本成功存储数据后，Follower副本还没有来得及进行同步，而此时Leader宕机了，那么此时虽然数据已进行了存储，由于原来的Leader已不可用而会从集群中下线，同时存活的代理又再也不会有从原来的Leader副本存储的数据，此时数据就会丢失。</p>
+</li>
+<li><p>当acks=-1时，Leader副本和所有ISR列表中的副本都完成数据存储时才会向生产者发送确认信息，这种策略保证只要Leader副本和Follower副本中至少有一个节点存活，数据就不会丢失。为了保证数据不丢失，需要保证同步的副本至少大于1，通过参数min.insync.replicas设置，当同步副本数不足此配置值时，生产者会抛出异常，但这种方式同时也影响了生产者发送消息的速度以及吞吐量。</p>
+</li>
+</ul>
+<h3 id="消费者-与-消费者组"><a href="#消费者-与-消费者组" class="headerlink" title="消费者 与 消费者组"></a>消费者 与 消费者组</h3><p>Kafka消费著可以理解成，外界从Kafka系统中获取消息数据的一种应用接口。消费者应用接口的主要作用是读取消息数据。Kafka系统提供了一系列的可操作脚本，这些脚本放置在<code>$KAFKA_HOME/bin</code>目录下。其中，有一个脚本可用来作为消费者客户端，即<code>kafka-console-consumer.sh</code>。<br>消费者属性如下：</p>
+<p><img src="/assets/blogImg/Kafka%E6%B6%88%E8%B4%B9%E8%80%85%E5%8F%82%E6%95%B0.png" alt="Kafka消费者参数"></p>
+<p>消费者（Comsumer）以拉取（pull）方式拉取数据，它是消费的客户端。在Kafka中每一个消费者都属于一个特定消费组（ConsumerGroup），我们可以为每个消费者指定一个消费组，以<code>groupId</code>代表消费组名称，通过<code>group.id</code>配置设置。如果不指定消费组，则该消费者属于默认消费组<code>test-consumer-group</code>。同时，每个消费者也有一个全局唯一的id，通过配置项<code>client.id</code>指定，如果客户端没有指定消费者的id, Kafka会自动为该消费者生成一个全局唯一的id，格式为<code>$&#123;groupId&#125;-$&#123;hostName&#125;-$&#123;timestamp&#125;-$&#123;UUID前8位字符&#125;</code>。<em>同一个主题的一条消息只能被同一个消费组下某一个消费者消费，但不同消费组的消费者可同时消费该消息</em>。<br>消费者组的特点：</p>
+<ul>
+<li><p>consumer group下可以有一个或多个consumer instance，consumer instance可以是一个进程，也可以是一个线程</p>
+</li>
+<li><p>group.id是一个字符串，唯一标识一个consumer group</p>
+</li>
+<li><p>consumer group下订阅的topic下的每个分区只能分配给某个group下的一个consumer(当然该分区还可以被分配给其他group)</p>
+</li>
+<li><p>消费者组的位移提交</p>
+</li>
+</ul>
+<p>Kafka消费的偏移量是存放在客户端的，由于ZK不适合做大批量的写操作，新版本Kafka增加了__consumeroffsets topic，将offset信息写入这个topic，摆脱对zookeeper的依赖(指保存offset这件事情)。__consumer_offsets中的消息保存了每个consumer group某一时刻提交的offset信息。</p>
+<h3 id="broker-代理"><a href="#broker-代理" class="headerlink" title="broker - 代理"></a>broker - 代理</h3><p>对于kafka而言，broker可以简单地看作一个独立的Kafka服务节点或Kafka服务实例。大多数情况下也可以将Broker看作一台Kafka服务器，前提是这台服务器上只部署了一个Kafka实例。</p>
+<h3 id="topic-主题-partition-分区-以及-Replica-副本"><a href="#topic-主题-partition-分区-以及-Replica-副本" class="headerlink" title="topic - 主题 partition - 分区 以及 Replica - 副本"></a>topic - 主题 partition - 分区 以及 Replica - 副本</h3><p>Kafka中的消息以<code>主题(topic)</code>为单位进行归类，生产者负责将消息发送到特定的主题（发送到Kafka集群中的每一条消息都要指定一个主题），而消费者负责订阅主题并进行消费。每一个代理都有唯一的标识id，这个id是一个非负整数。在一个Kafka集群中，每增加一个代理就需要为这个代理配置一个与该集群中其他代理不同的id, id值可以选择任意非负整数即可，只要保证它在整个Kafka集群中唯一，这个id就是代理的名字，也就是在启动代理时配置的broker.id对应的值。</p>
+<p>主题是一个逻辑上的概念，它还可以细分为多个<code>分区(partition)</code>，一个分区只属于单个主题。每个分区由一系列<code>有序、不可变</code>的消息组成，是一个有序队列。每个分区在物理上对应为一个文件夹，分区的命名规则为主题名称后接<code>—</code>连接符，之后再接分区编号，分区编号从0开始，编号最大值为分区的总数减1。每个分区又有一至多个<code>副本(Replica)</code>，分区的副本分布在集群的不同代理上，以提高可用性。从存储角度上分析，分区的每个副本在逻辑上抽象为一个<code>日志（Log）对象</code>，即<code>分区的副本与日志对象是一一对应的</code>。每个主题对应的分区数可以在Kafka启动时所加载的配置文件中配置，也可以在创建主题时指定。当然，客户端还可以在主题创建后修改主题的分区数。由于Kafka副本的存在，就需要保证一个分区的多个副本之间数据的一致性，Kafka会选择该分区的一个副本作为Leader副本，而该分区其他副本即为Follower副本，只有Leader副本才负责处理客户端读/写请求，Follower副本从Leader副本同步数据。副本Follower与Leader的角色并不是固定不变的，如果Leader失效，通过相应的选举算法将从其他Follower副本中选出新的Leader副本。同一主题下的不同分区包含的消息是不同的，分区在存储层面可以看作一个<code>可追加的日志（Log）文件</code>，消息在被追加到分区日志文件的时候都会分配一个特定的<code>偏移量（offset）</code>。offset是消息在分区中的唯一标识，Kafka通过它来保证消息在分区内的顺序性，不过offset并不跨越分区，也就是说，Kafka保证的是分区有序而不是主题有序。</p>
+<p>每一条消息被发送到broker之前，会根据分区规则选择存储到哪个具体的分区。如果分区规则设定得合理，所有的消息都可以均匀地分配到不同的分区中。如果一个主题只对应一个文件，那么这个文件所在的机器 I/O 将会成为这个主题的性能瓶颈，而分区解决了这个问题。在创建主题的时候可以通过指定的参数来设置分区的个数，当然也可以在主题创建完成之后去修改分区的数量，通过增加分区的数量可以实现水平扩展。</p>
+<p>Kafka 为分区引入了<code>多副本（Replica）</code>机制，通过增加副本数量可以提升容灾能力。同一分区的不同副本中保存的是相同的消息（在同一时刻，副本之间并非完全一样），副本之间是“一主多从”的关系，其中leader副本负责处理读写请求，follower副本只负责与leader副本的消息同步。副本处于不同的broker中，当leader副本出现故障时，从follower副本中重新选举新的leader副本对外提供服务。Kafka通过多副本机制实现了故障的自动转移，当Kafka集群中某个broker失效时仍然能保证服务可用。</p>
+<h3 id="日志段"><a href="#日志段" class="headerlink" title="日志段"></a>日志段</h3><p>一个日志又被划分为多个<code>日志段（LogSegment）</code>，日志段是Kafka日志对象分片的最小单位。与日志对象一样，日志段也是一个逻辑概念，一个日志段对应磁盘上一个具体日志文件和两个索引文件。日志文件是以“.log”为文件名后缀的数据文件，用于保存消息实际数据。两个索引文件分别以“.index”和“.timeindex”作为文件名后缀，分别表示消息偏移量索引文件和消息时间戳索引文件。</p>
+<h3 id="ISR"><a href="#ISR" class="headerlink" title="ISR"></a>ISR</h3><p>Kafka在ZooKeeper中动态维护了一个<code>ISR（In-sync Replica）</code>，即保存同步的副本列表，该列表中保存的是与Leader副本保持消息同步的所有副本对应的代理节点id。分区中的所有副本统称为<code>AR（Assigned Replicas）</code>。所有与leader副本保持一定程度同步的副本（包括leader副本在内）组成ISR（In-Sync Replicas），ISR集合是AR集合中的一个子集。消息会先发送到leader副本，然后follower副本才能从leader副本中拉取消息进行同步，同步期间内follower副本相对于leader副本而言会有一定程度的滞后。如果一个Follower副本宕机或是落后太多，则该Follower副本节点将从ISR列表中移除。与leader副本同步滞后过多的副本（不包括leader副本）组成<code>OSR（Out-of-Sync Replicas</code>），由此可见，<code>AR=ISR+OSR</code>。在正常情况下，所有的 follower 副本都应该与 leader 副本保持一定程度的同步，即 AR=ISR，OSR集合为空。</p>
+<p><code>LEO是Log End Offset</code>的缩写，它标识当前日志文件中下一条待写入消息的offset，offset为9的位置即为当前日志文件的LEO，LEO的大小相当于当前日志分区中最后一条消息的<code>offset值加1</code>。分区ISR集合中的每个副本都会维护自身的LEO，而ISR集合中最小的LEO即为分区的HW，对消费者而言只能消费HW之前的消息。</p>
+<p><img src="/assets/blogImg/Kafka%E5%88%86%E5%8C%BA%E8%AF%B4%E6%98%8E.png" alt="Kafka分区说明"></p>
+<p>Kafka 的复制机制既不是完全的同步复制，也不是单纯的异步复制。事实上，同步复制要求所有能工作的 follower 副本都复制完，这条消息才会被确认为已成功提交，这种复制方式极大地影响了性能。而在异步复制方式下，follower副本异步地从leader副本中复制数据，数据只要被leader副本写入就被认为已经成功提交。在这种情况下，如果follower副本都还没有复制完而落后于leader副本，突然leader副本宕机，则会造成数据丢失。Kafka使用的这种<code>ISR的方式则有效地权衡了数据可靠性和性能之间的关系</code>。</p>
+<h3 id="Kafka的选举机制"><a href="#Kafka的选举机制" class="headerlink" title="Kafka的选举机制"></a>Kafka的选举机制</h3><p>每个代理启动时会创建一个KafkaController实例，当KafkaController启动后就会从所有代理中选择一个代理作为控制器，控制器是所有代理的Leader，因此这里也称之为Leader选举。除了在启动时会导致选举外，当控制器所在代理发生故障或ZooKeeper通过心跳机制感知控制器与自己的连接Session已过期时，也会再次从所有代理中选出一个节点作为集群的控制器。</p>
+<p><img src="/assets/blogImg/kafka_leader_election.png" alt="Kafka leader 选举"></p>
+<p>Kafka控制器选举的核心思想就是各代理通过争抢向Zookeeper的/controller节点请求写入自身的信息。</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ZK中的/controller节点</span></span><br><span class="line">&#123;<span class="attr">&quot;version&quot;</span> :<span class="number">1</span>, <span class="attr">&quot;brokerid&quot;</span>:brokerId,<span class="attr">&quot;timestamp&quot;</span>:timestamp&#125;</span><br><span class="line"><span class="comment">// ZK中的分区Kafka数据</span></span><br><span class="line"><span class="comment">// /brokers/topics/$&#123;topicName&#125;/partitions/$&#123;partitionId&#125;/state</span></span><br><span class="line">&#123;<span class="attr">&quot;controller_epoch&quot;</span>:<span class="number">3</span>, <span class="attr">&quot;leader&quot;</span>:<span class="number">1</span>, <span class="attr">&quot;version&quot;</span>:<span class="number">0</span>, <span class="attr">&quot;leader_epoch&quot;</span>:<span class="string">&quot;0&quot;</span>, <span class="attr">&quot;isr&quot;</span>:[<span class="number">1</span>,<span class="number">3</span>]&#125;</span><br></pre></td></tr></table></figure>
+<p>controller_epoch: 用于记录控制器发生变更次数，即记录当前的控制器是第几代， 初始值为0，当控制器发生变更时，每选出一个新的控制器需将该字段加1， 如果请求的controller_epoch的值小于内存中controller_epoch的值，则认为这个请求是向已过期的控制器发送的请求，那么本次请求就是一个无效的请求。若该值大于内存中controller_epoch的值，则说明已有新的控制器当选了。通过该值来保证集群控制器的唯一性，进而保证相关操作一致性。该字段对应ZooKeeper的controller_epoch节点，通过登录ZooKeeper客户端执行get/controller_epoch命令，可以查看该字段对应的值。</p>
+<p>leader_epoch：分区Leader更新次数。controller_epoch是相对代理而言的，而leader_epoch是相对于分区来说的。由于各请求达到顺序不同，控制器通过controller_epoch和leader_epoch来确定具体应该执行哪个命令操作。</p>
+<h3 id="Kafka的协调器"><a href="#Kafka的协调器" class="headerlink" title="Kafka的协调器"></a>Kafka的协调器</h3><p>Kafka提供了三种协调器：</p>
+<ul>
+<li>消费者协调器（ConsumerCoordinator）: </li>
+</ul>
+<p>每个消费者实例化时会实例化一个ConsumerCoordinator对象，消费者协调器负责同一个消费组下各消费者与服务端组协调器之间的通信；<br>消费者协调器负责处理更新消费者缓存的Metadata请求，负责向组协调器发起加入消费组的请求，负责对本消费者加入消费组前、后相应的处理，负责请求离开消费组（如当消费者取消订阅时），还负责向组协调器发送提交消费偏移量的请求。并通过一个心跳检测定时任务来检测组协调器的运行状况，或是让组协调器感知自己的运行状况。同时，Leader消费者的消费者协调器还负责执行分区的分配，当消费者协调器向组协调器请求加入消费组后，组协调器会为同一个组下的消费者选出一个Leader，成为Leader的消费者其ConsumerCoordinator收到的信息与其他消费者有所不同。Leader消费者的ConsumerCoordinator负责消费者与分区的分配，会在请求SyncGroupRequest时将分配结果发送给GroupCoordinator，而非Leader消费者（这里我们将其简称为Follower消费者）, Follower消费者向GroupCoordinator发送SyncGroupRequest请求时分区分配结果参数为空，GroupCoordinator会将Leader副本发送过来的分区分配结果再返回给Follower消费者的ConsumerCoodinator。</p>
+<ul>
+<li>组协调器（GroupCoordinator: 用于管理部分消费组和该消费组下每个消费者的消费偏移量；</li>
+</ul>
+<p>组协调器（GroupCoordinator）负责对其管理的组员提交的相关请求进行处理，这里的组员即消费者。它负责管理与消费者之间建立连接，并从与之连接的消费者之中选出一个消费者作为Leader消费者，Leader消费者负责消费者分区的分配，在SyncGroupRequest请求时发送给组协调器，组协调器会在请求处理后返回响应时下发给其管理的所有消费者。同时，组协调器还管理与之连接的消费者的消费偏移量的提交，将每个消费者消费偏移量保存到Kafka的内部主题当中，并通过心跳检测来检测消费者与自己的连接状态。<br><em>消费者组确定协调器</em><br>确定consumer group位移信息写入__consumers_offsets的哪个分区,该分区leader所在的broker就是被选定的coordinator</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> groupMetadataTopicPartitionCount由offsets.topic.num.partitions指定，默认是50个分区。</span></span><br><span class="line">__consumers_offsets partition# = Math.abs(groupId.hashCode() % groupMetadataTopicPartitionCount)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>任务管理协调器（WorkCoordinator）</li>
+</ul>
+<h3 id="消费者组的再平衡-rebalance"><a href="#消费者组的再平衡-rebalance" class="headerlink" title="消费者组的再平衡 - rebalance"></a>消费者组的再平衡 - rebalance</h3><p>新成员入消费者组，消费者组成员崩溃或者主动离开消费者组，这三种都会触发kafka 消费者组的<code>rebalance</code>;<br>1 Join， 顾名思义就是加入组。这一步中，所有成员都向coordinator发送JoinGroup请求，请求入组。一旦所有成员都发送了JoinGroup请求，coordinator会从中选择一个consumer担任leader的角色，并把组成员信息以及订阅信息发给leader——注意leader和coordinator不是一个概念。leader负责消费分配方案的制定。</p>
+<p>2 Sync，这一步leader开始分配消费方案，即哪个consumer负责消费哪些topic的哪些partition。一旦完成分配，leader会将这个方案封装进SyncGroup请求中发给coordinator，非leader也会发SyncGroup请求，只是内容为空。coordinator接收到分配方案之后会把方案塞进SyncGroup的response中发给各个consumer。这样组内的所有成员就都知道自己应该消费哪些分区了。</p>
+<h1 id="Kafka的基础操作"><a href="#Kafka的基础操作" class="headerlink" title="Kafka的基础操作"></a>Kafka的基础操作</h1><h2 id="KafkaServer管理"><a href="#KafkaServer管理" class="headerlink" title="KafkaServer管理"></a>KafkaServer管理</h2><h3 id="单节点启动"><a href="#单节点启动" class="headerlink" title="单节点启动"></a>单节点启动</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 进入bin目录</span></span><br><span class="line">kafka-server-start.sh -daemon ../config/server.properties</span><br></pre></td></tr></table></figure>
+<p>bin目录下的<code>kafka-server-start.sh</code>即为启动脚本。启动后会在<code>$KAFKA_HOME/logs</code>目录下创建相应的日志文件。</p>
+<p><img src="/assets/blogImg/Kafka%E6%97%A5%E5%BF%97%E6%96%87%E4%BB%B6%E5%88%86%E7%B1%BB.png" alt="Kafka日志文件分类"></p>
+<p>启动完毕后，登录ZooKeeper客户端查看相应节点信息。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 启动zk客户端</span></span><br><span class="line">zkCli.sh -server 192.168.56.104:2181</span><br><span class="line">[zk: 192.168.56.104:2181(CONNECTED) 0] get /controller</span><br><span class="line">&#123;&quot;version&quot;:1,&quot;brokerid&quot;:1,&quot;timestamp&quot;:&quot;1581667736716&quot;&#125;</span><br><span class="line">[zk: 192.168.56.104:2181(CONNECTED) 1]</span><br></pre></td></tr></table></figure>
+<p>JMX监控开启，需要将<code>JMX_PORT</code>配置添加到KafkaServer启动脚本<code>kafka-server-start.sh</code>文件中，该项监控可以在<code>kafka-manager</code>中看到。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 在启动脚本中首行添加</span></span><br><span class="line">export JMX_PORT=9999</span><br></pre></td></tr></table></figure>
+<p>也可以在启动命令中配置</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">JMX_PORT=9999 kafka-server-start.sh -daemon ../config/server.properties</span><br></pre></td></tr></table></figure>
+
+<h3 id="集群启动"><a href="#集群启动" class="headerlink" title="集群启动"></a>集群启动</h3><p>可以编写个脚本来启动集群中所有节点 <em># $?是指上一次命令执行的成功或者失败的状态。如果成功就是0，失败为1</em></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> kafka-cluster-start.sh</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> !/bin/bash</span></span><br><span class="line">brokers=&quot;192.168.56.101 192.168.56.102 192.168.56.103&quot;</span><br><span class="line">KAFKA_HOME=&quot;/usr/local/kafka_2.13-2.4.0&quot;</span><br><span class="line">echo &quot;INFO: Begin to start kafka cluster...&quot;</span><br><span class="line"></span><br><span class="line">for broker in $brokers</span><br><span class="line">do</span><br><span class="line">    echo &quot;INFO:Start kafka on $&#123;broker&#125;...&quot;</span><br><span class="line">    ssh $broker -C &quot;source /etc/profile; sh $&#123;KAFKA_HOME&#125;/bin/kafka-server-start.sh -daemon $&#123;KAFKA_HOME&#125;/config/server.properties&quot;</span><br><span class="line">    if [ $? -eq 0 ]; then</span><br><span class="line">        echo &quot;INFO:[$&#123;broker&#125;] Start successfully...&quot;</span><br><span class="line">    fi</span><br><span class="line">done</span><br><span class="line">echo &quot;INFO:Kafka cluster starts successfully!&quot;</span><br></pre></td></tr></table></figure>
+
+<h3 id="单节点关闭"><a href="#单节点关闭" class="headerlink" title="单节点关闭"></a>单节点关闭</h3><p>执行<code>bin</code>目录下的<code>kafka-server-stop.sh</code>即可停止kafka。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">SIGNAL=$&#123;SIGNAL:-TERM&#125;</span><br><span class="line">PIDS=$(ps ax | grep -i &#x27;kafka\.Kafka&#x27; | grep java | grep -v grep | awk &#x27;&#123;print $1&#125;&#x27;)</span><br><span class="line"></span><br><span class="line">if [ -z &quot;$PIDS&quot; ]; then</span><br><span class="line">  echo &quot;No kafka server to stop&quot;</span><br><span class="line">  exit 1</span><br><span class="line">else</span><br><span class="line">  kill -s $SIGNAL $PIDS</span><br><span class="line">fi</span><br></pre></td></tr></table></figure>
+<p>停止的原理是<code>kill</code> kafka的PID，由于我的kafka-manager和kafka0节点装在一起，所以会连代停止我的kafka-manager。<br>如果想准确的停止kafka，获取PID时可以使用<code>PIDS=$(jps | grep -i &#39;Kafka&#39; | awk &#39;&#123;print $1&#125;&#39;)</code></p>
+<h3 id="集群关闭"><a href="#集群关闭" class="headerlink" title="集群关闭"></a>集群关闭</h3><p>与集群启动类似，编写一个调用<code>bin</code>目录下的<code>kafka-server-stop.sh</code>的脚本即可停止。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> kafka-cluster-stop.sh</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> !/bin/bash</span></span><br><span class="line">brokers=&quot;192.168.56.101 192.168.56.102 192.168.56.103&quot;</span><br><span class="line">KAFKA_HOME=&quot;/usr/local/kafka_2.13-2.4.0&quot;</span><br><span class="line">echo &quot;INFO: Begin to shut down kafka cluster...&quot;</span><br><span class="line"></span><br><span class="line">for broker in $brokers</span><br><span class="line">do</span><br><span class="line">    echo &quot;INFO:Shut down kafka on $&#123;broker&#125;...&quot;</span><br><span class="line">    ssh $broker -C &quot;$&#123;KAFKA_HOME&#125;/bin/kafka-server-stop.sh&quot;</span><br><span class="line">    if [ $? -eq 0 ]; then</span><br><span class="line">        echo &quot;INFO:[$&#123;broker&#125;] Shut down successfully...&quot;</span><br><span class="line">    fi</span><br><span class="line">done</span><br><span class="line">echo &quot;INFO:Kafka cluster shut down successfully!&quot;</span><br></pre></td></tr></table></figure>
+
+<h2 id="主题管理"><a href="#主题管理" class="headerlink" title="主题管理"></a>主题管理</h2><h3 id="主题创建"><a href="#主题创建" class="headerlink" title="主题创建"></a>主题创建</h3><p>客户端通过执行<code>kafka-topics.sh</code>脚本创建一个主题。若开启了自动创建主题配置项auto.create.topics.enable=true，当生产者向一个还不存在的主题发送消息时，Kafka会自动创建该主题。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 直接输入该脚本的名字可以查看有哪些命令参数</span></span><br><span class="line">kafka-topics.sh</span><br><span class="line"><span class="meta">#</span><span class="bash"> 创建一个名为 kafka-action的主题，该主题拥有2个副本，3个分区</span></span><br><span class="line">kafka-topics.sh --create --zookeeper 192.168.56.104:2181,192.168.56.105:2181,192.168.56.106:2181 --replication-factor 2 --partitions 3 --topic kafka-action</span><br><span class="line"><span class="meta">#</span><span class="bash"> 登录ZooKeeper客户端查看所创建的主题元数据信息</span></span><br><span class="line">[zk: 192.168.56.104:2181(CONNECTED) 4] ls /brokers/topics/kafka-action/partitions</span><br><span class="line">[0, 1, 2]</span><br><span class="line">[zk: 192.168.56.104:2181(CONNECTED) 5] get /brokers/topics/kafka-action</span><br><span class="line">&#123;&quot;version&quot;:2,&quot;partitions&quot;:&#123;&quot;0&quot;:[1,2],&quot;1&quot;:[2,3],&quot;2&quot;:[3,1]&#125;,&quot;adding_replicas&quot;:&#123;&#125;,&quot;removing_replicas&quot;:&#123;&#125;&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><p>zookeeper参数是必传参数，用于配置Kafka集群与ZooKeeper连接地址，这里并不要求传递${ zookeeper.connect }配置的所有连接地址。为了容错，建议多个ZooKeeper节点的集群至少传递两个ZooKeeper连接配置，多个配置之间以逗号隔开。</p>
+</li>
+<li><p>partitions参数用于设置主题分区数，该配置为必传参数。Kafka通过分区分配策略，将一个主题的消息分散到多个分区并分别保存到不同的代理上，以此来提高消息处理的吞吐量。Kafka的生产者和消费者可以采用多线程并行对主题消息进行处理，而每个线程处理的是一个分区的数据，因此分区实际上是Kafka并行处理的基本单位。分区数越多一定程度上会提升消息处理的吞吐量，然而Kafka消息是以追加的形式存储在文件中的，这就意味着分区越多需要打开更多的文件句柄，这样也会带来一定的开销。</p>
+</li>
+<li><p>replication-factor参数用来设置主题副本数，该配置也是必传参数。副本会被分布在不同的节点上，副本数不能超过节点数，否则创建主题会失败</p>
+</li>
+</ul>
+<p>进入在<code>server.properties</code>中配置的<code>log.dirs=/opt/data/kafka-logs</code>对应的目录下，创建主题后会在<code>$&#123;log.dir&#125;</code>目录下创建相应的分区文件目录，副本分别分布在不同的节点上。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 以kafka0节点为例子，查看分区文件</span></span><br><span class="line">cd /opt/data/kafka-logs</span><br><span class="line">ls -l</span><br><span class="line">drwxr-xr-x 2 root root 4096 Feb 16 04:08 kafka-action-0</span><br><span class="line">drwxr-xr-x 2 root root 4096 Feb 16 04:08 kafka-action-2</span><br><span class="line"></span><br><span class="line">root@kafka0:/opt/data/kafka-logs# cd ./kafka-action-0</span><br><span class="line">root@kafka0:/opt/data/kafka-logs/kafka-action-0# ls -l</span><br><span class="line">total 4</span><br><span class="line">-rw-r--r-- 1 root root 10485760 Feb 16 04:08 00000000000000000000.index</span><br><span class="line">-rw-r--r-- 1 root root        0 Feb 16 04:08 00000000000000000000.log</span><br><span class="line">-rw-r--r-- 1 root root 10485756 Feb 16 04:08 00000000000000000000.timeindex</span><br><span class="line">-rw-r--r-- 1 root root        8 Feb 16 04:08 leader-epoch-checkpoint</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h3 id="主题删除"><a href="#主题删除" class="headerlink" title="主题删除"></a>主题删除</h3><p>执行kafka-topics.sh脚本进行删除，若希望通过该脚本彻底删除主题，则需要保证在启动Kafka时所加载的<code>server.properties</code>文件中配置<code>delete.topic.enable=true</code>，该配置默认为<code>false</code>。否则执行该脚本并未真正删除主题，而是在ZooKeeper的/admin/delete_topics目录下创建一个与待删除主题同名的节点，将该主题标记为删除状态。主题在<code>$&#123;log.dir&#125;</code>目录下对应的分区文件及在ZooKeeper中的相应节点并未被删除，这个时候需要你手动删除。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kafka-topics.sh --delete --zookeeper 192.168.56.104:2181,192.168.56.105:2181,192.168.56.106:2181 --topic kafka-action</span><br></pre></td></tr></table></figure>
+<p>直接执行的话，用zk客户端去看</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[zk: 192.168.56.104:2181(CONNECTED) 8] ls /admin/delete_topics</span><br><span class="line">[kafka-action]</span><br></pre></td></tr></table></figure>
+
+<h3 id="查看主题"><a href="#查看主题" class="headerlink" title="查看主题"></a>查看主题</h3><ul>
+<li>查看该集群下所有主题<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kafka-topics.sh --list --zookeeper 192.168.56.104:2181,192.168.56.105:2181,192.168.56.106:2181</span><br></pre></td></tr></table></figure></li>
+<li>查看特定主题的信息<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kafka-topics.sh --topic kafka-action --describe --zookeeper 192.168.56.104:2181,192.168.56.105:2181,192.168.56.106:2181</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="查看消息"><a href="#查看消息" class="headerlink" title="查看消息"></a>查看消息</h3><p>Kafka生产的消息以二进制的形式存在文件中，Kafka提供了一个查看日志文件的工具类<code>kafka.tools.DumpLogSegments</code>。通过<code>kafka-run-class.sh</code>脚本，可以直接在终端运行该工具类</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 查看kafka-action-test主题下的消息内容</span></span><br><span class="line">kafka-run-class.sh kafka.tools.DumpLogSegments --files /opt/data/kafka-logs/kafka-action-test-1/00000000000000000000.log</span><br></pre></td></tr></table></figure>
+
+<h2 id="生产者-1"><a href="#生产者-1" class="headerlink" title="生产者"></a>生产者</h2><h3 id="启动生产者"><a href="#启动生产者" class="headerlink" title="启动生产者"></a>启动生产者</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> broker-list 指定Kafka的代理地址列表 topic 指定消息被发送的目标主题 key.separator 指定key 和 消息之间的分隔符</span></span><br><span class="line">kafka-console-producer.sh --broker-list 192.168.56.101:9092,192.168.56.102:9092,192.168.56.103:9092 --topic kafka-action-test --property parse.key=true --property key.separator=&#x27; &#x27;</span><br></pre></td></tr></table></figure>
+
+<h3 id="生产者性能测试"><a href="#生产者性能测试" class="headerlink" title="生产者性能测试"></a>生产者性能测试</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kafka-producer-perf-test.sh --num-records 10000 --record-size 1000 --topic kafka-action-test --throughput 10000 --producer-props bootstrap.servers=192.168.56.101:9092,192.168.56.102:9092,192.168.56.103:9092</span><br></pre></td></tr></table></figure>
+<p><code>kafka-producer-perf-test.sh</code>脚本调用的是org.apache.kafka.tools.ProducerPerformance类</p>
+<ul>
+<li>topic  指定了生产者发送消息的目标主题</li>
+<li>num-records 测试时发送消息的总条数</li>
+<li>record-size 每条消息的字节数</li>
+<li>throughput 限流控制 throughput值小于0时则不进行限流；若该参数值大于0时，当已发送的消息总字节数与当前已执行的时间取整大于该字段时生产者线程会被阻塞一段时间。生产者线程被阻塞时，在控制台可以看到输出一行吞吐量统计信息；若该参数值等于0时，则生产者在发送一次消息之后检测满足阻塞条件时将会一直被阻塞。</li>
+</ul>
+<p>上述命令执行结果如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">10000 records sent, 4618.937644 records/sec (4.40 MB/sec), 895.99 ms avg latency, 1232.00 ms max latency, 940 ms 50th, 1199 ms 95th, 1220 ms 99th, 1232 ms 99.9th.</span><br></pre></td></tr></table></figure>
+<ul>
+<li>recores send 测试时发送的消息总数</li>
+<li>records/sec 每秒发送的消息数 - 吞吐量</li>
+<li>avg latency 消息处理的平均耗时 ms</li>
+<li>max latency 消息处理的最大耗时 ms</li>
+<li>X th %Xd的消息处理耗时</li>
+</ul>
+<h2 id="消费者"><a href="#消费者" class="headerlink" title="消费者"></a>消费者</h2><p>Kafka采用了消费组的模式，每个消费者都属于某一个消费组，在创建消费者时，若不指定消费者的groupId，则该消费者属于默认消费组。消费组是一个全局的概念，因此在设置group.id时，要确保该值在Kafka集群中唯一。同一个消费组下的各消费者在消费消息时是互斥的，也就是说，对于一条消息而言，就同一个消费组下的消费者来讲，只能被同组下的某一个消费者消费，但不同消费组的消费者能消费同一条消息。</p>
+<h3 id="启动消费者"><a href="#启动消费者" class="headerlink" title="启动消费者"></a>启动消费者</h3><p><code>kafka-console-consumer.sh</code>脚本调用的是Kafka core工程下kafka.tools包下的ConsoleConsumer对象，该对象调用（org.apache.kafka.clients.consumer.KafkaConsumer）消费消息。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kafka-console-consumer.sh --bootstrap-server 192.168.56.101:9092,192.168.56.102:9092,192.168.56.103:9092 --consumer-property group.id=consumer-test --topic kafka-action-test --from-beginning</span><br></pre></td></tr></table></figure>
+
+<h3 id="查看消费者组的信息"><a href="#查看消费者组的信息" class="headerlink" title="查看消费者组的信息"></a>查看消费者组的信息</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 查看所有消费者组</span></span><br><span class="line">kafka-consumer-groups.sh --bootstrap-server 192.168.56.101:9092,192.168.56.102:9092,192.168.56.103:9092 --list</span><br><span class="line"><span class="meta">#</span><span class="bash"> 查看指定消费者组信息</span></span><br><span class="line">kafka-consumer-groups.sh --bootstrap-server 192.168.56.101:9092,192.168.56.102:9092,192.168.56.103:9092 --describe --group hello</span><br><span class="line"><span class="meta">#</span><span class="bash"> 删除指定消费者组</span></span><br><span class="line">kafka-consumer-groups.sh --bootstrap-server 192.168.56.101:9092,192.168.56.102:9092,192.168.56.103:9092 --delete --group hello</span><br></pre></td></tr></table></figure>
+<p><img src="/assets/blogImg/Kafka%E6%B6%88%E8%B4%B9%E8%80%85%E7%BB%84%E6%93%8D%E4%BD%9C.png" alt="Kafka消费者组操作"></p>
+<h3 id="消费者性能测试工具"><a href="#消费者性能测试工具" class="headerlink" title="消费者性能测试工具"></a>消费者性能测试工具</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kafka-consumer-perf-test.sh --broker-list 192.168.56.101:9092,192.168.56.102:9092,192.168.56.103:9092 --threads 5 --messages 10000 --socket-buffer-size 10000 --num-fetch-threads 2 --group consumer-perf-test --topic kafka-action-test</span><br></pre></td></tr></table></figure>
+<p>输出如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">start.time, end.time, data.consumed.in.MB, MB.sec, data.consumed.in.nMsg, nMsg.sec, rebalance.time.ms, fetch.time.ms, fetch.MB.sec, fetch.nMsg.sec</span><br><span class="line">2020-02-20 16:07:33:457, 2020-02-20 16:07:34:668, 9.5369, 7.8752, 10029, 8281.5855, 1582214853971, -1582214852760, -0.0000, -0.0000</span><br></pre></td></tr></table></figure>
+<h1 id="Kafka的源码编译"><a href="#Kafka的源码编译" class="headerlink" title="Kafka的源码编译"></a>Kafka的源码编译</h1><h2 id="环境搭建"><a href="#环境搭建" class="headerlink" title="环境搭建"></a>环境搭建</h2><h3 id="安装Scala"><a href="#安装Scala" class="headerlink" title="安装Scala"></a>安装Scala</h3><p>Windows环境下，下载并安装Scala。先进入Scala官方网站<a target="_blank" rel="noopener" href="http://www.scala-lang.org/download/">这里</a>下载相应的安装包并安装。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 查询Scala版本</span></span><br><span class="line">scala -version</span><br></pre></td></tr></table></figure>
+
+<h3 id="安装Gradle"><a href="#安装Gradle" class="headerlink" title="安装Gradle"></a>安装Gradle</h3><p>进入Gradle官方网站<a target="_blank" rel="noopener" href="https://gradle.org/releases/">这里</a>下载Gradle安装包。将下载好的<code>gradle-6.1.1-bin</code>解压后，配置<code>GRADLE_HOME</code>以及<code>%GRADLE_HOME%\bin</code>到环境变量。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 查询gradle版本</span></span><br><span class="line">gradle -version</span><br></pre></td></tr></table></figure>
+
+<h3 id="Kafka源码编译"><a href="#Kafka源码编译" class="headerlink" title="Kafka源码编译"></a>Kafka源码编译</h3><p>先进入<a target="_blank" rel="noopener" href="http://kafka.apache.org/downloads.html">这里</a>下载Kafka src 源码文件。进入源码根目录，执行<code>gradle idea</code>。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Docker/" rel="tag"># Docker</a>
+              <a href="/tags/Kafka/" rel="tag"># Kafka</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/02/05/Spring%E7%9A%84%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96/" rel="prev" title="Spring循环依赖三级缓存解析">
+      <i class="fa fa-chevron-left"></i> Spring循环依赖三级缓存解析
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/03/09/JAVA%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86-NIO/" rel="next" title="JAVA基础知识-NIO">
+      JAVA基础知识-NIO <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Kafka%E7%9A%84%E5%AE%89%E8%A3%85%E9%85%8D%E7%BD%AE"><span class="nav-number">1.</span> <span class="nav-text">Kafka的安装配置</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Ubuntu%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%8E%AF%E5%A2%83%E4%B8%8BKafka%E5%AE%89%E8%A3%85%E4%B8%8E%E9%85%8D%E7%BD%AE"><span class="nav-number">1.1.</span> <span class="nav-text">Ubuntu服务器环境下Kafka安装与配置</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Zookeeper%E5%AE%89%E8%A3%85%E4%B8%8E%E9%85%8D%E7%BD%AE-standalone%E6%A8%A1%E5%BC%8F"><span class="nav-number">1.1.1.</span> <span class="nav-text">Zookeeper安装与配置 - standalone模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Zookeeper%E5%AE%89%E8%A3%85%E4%B8%8E%E9%85%8D%E7%BD%AE-%E9%9B%86%E7%BE%A4%E6%A8%A1%E5%BC%8F"><span class="nav-number">1.1.2.</span> <span class="nav-text">Zookeeper安装与配置 - 集群模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Kafka%E5%AE%89%E8%A3%85%E4%B8%8E%E9%85%8D%E7%BD%AE-%E5%8D%95%E6%9C%BA%E6%A8%A1%E5%BC%8F"><span class="nav-number">1.1.3.</span> <span class="nav-text">Kafka安装与配置 - 单机模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Kafka%E5%AE%89%E8%A3%85%E4%B8%8E%E9%85%8D%E7%BD%AE-%E9%9B%86%E7%BE%A4%E6%A8%A1%E5%BC%8F"><span class="nav-number">1.1.4.</span> <span class="nav-text">Kafka安装与配置 - 集群模式</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Docker%E7%8E%AF%E5%A2%83%E5%AE%89%E8%A3%85%E4%B8%8E%E9%85%8D%E7%BD%AE"><span class="nav-number">1.2.</span> <span class="nav-text">Docker环境安装与配置</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%95%9C%E5%83%8F%E4%B8%8B%E8%BD%BD"><span class="nav-number">1.2.1.</span> <span class="nav-text">镜像下载</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#zookeeper%E5%AE%B9%E5%99%A8%E5%90%AF%E5%8A%A8"><span class="nav-number">1.2.2.</span> <span class="nav-text">zookeeper容器启动</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#kafka%E5%AE%B9%E5%99%A8%E5%90%AF%E5%8A%A8"><span class="nav-number">1.2.3.</span> <span class="nav-text">kafka容器启动</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8D%95%E8%8A%82%E7%82%B9%E9%83%A8%E7%BD%B2"><span class="nav-number">1.2.3.1.</span> <span class="nav-text">单节点部署</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Kafka%E4%BC%AA%E5%88%86%E5%B8%83%E5%BC%8F%E7%8E%AF%E5%A2%83%E9%83%A8%E7%BD%B2"><span class="nav-number">1.2.3.2.</span> <span class="nav-text">Kafka伪分布式环境部署</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Kafka-Manager%E5%AE%89%E8%A3%85"><span class="nav-number">1.3.</span> <span class="nav-text">Kafka Manager安装</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Kafka%E6%A6%82%E5%BF%B5%E8%AF%B4%E6%98%8E"><span class="nav-number">2.</span> <span class="nav-text">Kafka概念说明</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5"><span class="nav-number">2.1.</span> <span class="nav-text">基础概念</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%9F%E4%BA%A7%E8%80%85"><span class="nav-number">2.1.1.</span> <span class="nav-text">生产者</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B6%88%E8%B4%B9%E8%80%85-%E4%B8%8E-%E6%B6%88%E8%B4%B9%E8%80%85%E7%BB%84"><span class="nav-number">2.1.2.</span> <span class="nav-text">消费者 与 消费者组</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#broker-%E4%BB%A3%E7%90%86"><span class="nav-number">2.1.3.</span> <span class="nav-text">broker - 代理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#topic-%E4%B8%BB%E9%A2%98-partition-%E5%88%86%E5%8C%BA-%E4%BB%A5%E5%8F%8A-Replica-%E5%89%AF%E6%9C%AC"><span class="nav-number">2.1.4.</span> <span class="nav-text">topic - 主题 partition - 分区 以及 Replica - 副本</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%97%A5%E5%BF%97%E6%AE%B5"><span class="nav-number">2.1.5.</span> <span class="nav-text">日志段</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ISR"><span class="nav-number">2.1.6.</span> <span class="nav-text">ISR</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Kafka%E7%9A%84%E9%80%89%E4%B8%BE%E6%9C%BA%E5%88%B6"><span class="nav-number">2.1.7.</span> <span class="nav-text">Kafka的选举机制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Kafka%E7%9A%84%E5%8D%8F%E8%B0%83%E5%99%A8"><span class="nav-number">2.1.8.</span> <span class="nav-text">Kafka的协调器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B6%88%E8%B4%B9%E8%80%85%E7%BB%84%E7%9A%84%E5%86%8D%E5%B9%B3%E8%A1%A1-rebalance"><span class="nav-number">2.1.9.</span> <span class="nav-text">消费者组的再平衡 - rebalance</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Kafka%E7%9A%84%E5%9F%BA%E7%A1%80%E6%93%8D%E4%BD%9C"><span class="nav-number">3.</span> <span class="nav-text">Kafka的基础操作</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#KafkaServer%E7%AE%A1%E7%90%86"><span class="nav-number">3.1.</span> <span class="nav-text">KafkaServer管理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8D%95%E8%8A%82%E7%82%B9%E5%90%AF%E5%8A%A8"><span class="nav-number">3.1.1.</span> <span class="nav-text">单节点启动</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9B%86%E7%BE%A4%E5%90%AF%E5%8A%A8"><span class="nav-number">3.1.2.</span> <span class="nav-text">集群启动</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8D%95%E8%8A%82%E7%82%B9%E5%85%B3%E9%97%AD"><span class="nav-number">3.1.3.</span> <span class="nav-text">单节点关闭</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9B%86%E7%BE%A4%E5%85%B3%E9%97%AD"><span class="nav-number">3.1.4.</span> <span class="nav-text">集群关闭</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%BB%E9%A2%98%E7%AE%A1%E7%90%86"><span class="nav-number">3.2.</span> <span class="nav-text">主题管理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BB%E9%A2%98%E5%88%9B%E5%BB%BA"><span class="nav-number">3.2.1.</span> <span class="nav-text">主题创建</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BB%E9%A2%98%E5%88%A0%E9%99%A4"><span class="nav-number">3.2.2.</span> <span class="nav-text">主题删除</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E4%B8%BB%E9%A2%98"><span class="nav-number">3.2.3.</span> <span class="nav-text">查看主题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E6%B6%88%E6%81%AF"><span class="nav-number">3.2.4.</span> <span class="nav-text">查看消息</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%94%9F%E4%BA%A7%E8%80%85-1"><span class="nav-number">3.3.</span> <span class="nav-text">生产者</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%AF%E5%8A%A8%E7%94%9F%E4%BA%A7%E8%80%85"><span class="nav-number">3.3.1.</span> <span class="nav-text">启动生产者</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%9F%E4%BA%A7%E8%80%85%E6%80%A7%E8%83%BD%E6%B5%8B%E8%AF%95"><span class="nav-number">3.3.2.</span> <span class="nav-text">生产者性能测试</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B6%88%E8%B4%B9%E8%80%85"><span class="nav-number">3.4.</span> <span class="nav-text">消费者</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%AF%E5%8A%A8%E6%B6%88%E8%B4%B9%E8%80%85"><span class="nav-number">3.4.1.</span> <span class="nav-text">启动消费者</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E6%B6%88%E8%B4%B9%E8%80%85%E7%BB%84%E7%9A%84%E4%BF%A1%E6%81%AF"><span class="nav-number">3.4.2.</span> <span class="nav-text">查看消费者组的信息</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B6%88%E8%B4%B9%E8%80%85%E6%80%A7%E8%83%BD%E6%B5%8B%E8%AF%95%E5%B7%A5%E5%85%B7"><span class="nav-number">3.4.3.</span> <span class="nav-text">消费者性能测试工具</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Kafka%E7%9A%84%E6%BA%90%E7%A0%81%E7%BC%96%E8%AF%91"><span class="nav-number">4.</span> <span class="nav-text">Kafka的源码编译</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA"><span class="nav-number">4.1.</span> <span class="nav-text">环境搭建</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E8%A3%85Scala"><span class="nav-number">4.1.1.</span> <span class="nav-text">安装Scala</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E8%A3%85Gradle"><span class="nav-number">4.1.2.</span> <span class="nav-text">安装Gradle</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Kafka%E6%BA%90%E7%A0%81%E7%BC%96%E8%AF%91"><span class="nav-number">4.1.3.</span> <span class="nav-text">Kafka源码编译</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">LEEZY</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">37</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">LEEZY</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

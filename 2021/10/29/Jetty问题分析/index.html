@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.leezy.top","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="Jetty 9.4.17版本bug分析">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Jetty问题分析">
+<meta property="og:url" content="https://www.leezy.top/2021/10/29/Jetty%E9%97%AE%E9%A2%98%E5%88%86%E6%9E%90/index.html">
+<meta property="og:site_name" content="SAKURA">
+<meta property="og:description" content="Jetty 9.4.17版本bug分析">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://www.leezy.top/assets/blogImg/jetty_running.png">
+<meta property="og:image" content="https://www.leezy.top/assets/blogImg/only_acceptor_response.png">
+<meta property="og:image" content="https://www.leezy.top/assets/blogImg/jetty_queuedThreadPool.png">
+<meta property="og:image" content="https://www.leezy.top/assets/blogImg/jetty_start.png">
+<meta property="og:image" content="https://www.leezy.top/assets/blogImg/jetty_abstractConnector.png">
+<meta property="og:image" content="https://www.leezy.top/assets/blogImg/jetty_selectorManager.png">
+<meta property="og:image" content="https://www.leezy.top/assets/blogImg/github_jetty_fixed.png">
+<meta property="article:published_time" content="2021-10-29T09:32:00.000Z">
+<meta property="article:modified_time" content="2022-01-03T15:59:48.080Z">
+<meta property="article:author" content="LEEZY">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="Jetty">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://www.leezy.top/assets/blogImg/jetty_running.png">
+
+<link rel="canonical" href="https://www.leezy.top/2021/10/29/Jetty%E9%97%AE%E9%A2%98%E5%88%86%E6%9E%90/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Jetty问题分析 | SAKURA</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">SAKURA</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://www.leezy.top/2021/10/29/Jetty%E9%97%AE%E9%A2%98%E5%88%86%E6%9E%90/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="LEEZY">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="SAKURA">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Jetty问题分析
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-10-29 17:32:00" itemprop="dateCreated datePublished" datetime="2021-10-29T17:32:00+08:00">2021-10-29</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-01-03 23:59:48" itemprop="dateModified" datetime="2022-01-03T23:59:48+08:00">2022-01-03</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>Jetty 9.4.17版本bug分析</p>
+<span id="more"></span>
+
+<h3 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h3><p>使用了<code>9.4.17</code>版本的jetty作为容器，当服务启动后，过段时间发起http请求就会没有响应，通过抓包发现客户端和服务端连接都已建立。通过分析工具查看，发现jetty的acceptor已经接受了请求，但是没有线程进行处理。</p>
+<p>正常情况:</p>
+<p><img src="/assets/blogImg/jetty_running.png" alt="jetty_running"></p>
+<p>异常情况:</p>
+<p><img src="/assets/blogImg/only_acceptor_response.png" alt="only_acceptor_response"></p>
+<h3 id="原因分析"><a href="#原因分析" class="headerlink" title="原因分析"></a>原因分析</h3><p>本人外网电脑CPU是<code>i9-9900k</code>正好<code>16个cpu核心</code>。通过搜资料查看<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/34275781">Jetty的线程模型</a>并下载源码，发现Jetty的一个请求调用涉及到<code>acceptor</code>，<code>selector</code>，<code>reserved</code> ，<code>idle</code>这四类线程，据我的理解<code>idle</code>线程即<code>worker</code>。<code>acceptor</code>负责监听<code>servlet</code>请求，<code>selector</code>负责请求解析转发，新的<code>idle</code>线程负责执行调用，<code>reserved</code> 线程池是jetty<code>9.4.x</code><a target="_blank" rel="noopener" href="https://support.sonatype.com/hc/en-us/articles/360000744687-Understanding-Eclipse-Jetty-9-4-8-Thread-Allocation">的新功能</a>，当jetty线程池不够的时候才会使用, 本问题不涉及。</p>
+<p>通过查看源码，Jetty的servel首先一个很重要的配置文件即<code>jetty-threadpool.xml</code></p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot;?&gt;</span></span><br><span class="line"><span class="meta">&lt;!DOCTYPE <span class="meta-keyword">Configure</span> <span class="meta-keyword">PUBLIC</span> <span class="meta-string">&quot;-//Jetty//Configure//EN&quot;</span> <span class="meta-string">&quot;http://www.eclipse.org/jetty/configure_9_3.dtd&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">Configure</span>&gt;</span></span><br><span class="line">  <span class="comment">&lt;!-- =========================================================== --&gt;</span></span><br><span class="line">  <span class="comment">&lt;!-- Configure the Server Thread Pool.                           --&gt;</span></span><br><span class="line">  <span class="comment">&lt;!-- The server holds a common thread pool which is used by      --&gt;</span></span><br><span class="line">  <span class="comment">&lt;!-- default as the executor used by all connectors and servlet  --&gt;</span></span><br><span class="line">  <span class="comment">&lt;!-- dispatches.                                                 --&gt;</span></span><br><span class="line">  <span class="comment">&lt;!--                                                             --&gt;</span></span><br><span class="line">  <span class="comment">&lt;!-- Configuring a fixed thread pool is vital to controlling the --&gt;</span></span><br><span class="line">  <span class="comment">&lt;!-- maximal memory footprint of the server and is a key tuning  --&gt;</span></span><br><span class="line">  <span class="comment">&lt;!-- parameter for tuning.  In an application that rarely blocks --&gt;</span></span><br><span class="line">  <span class="comment">&lt;!-- then maximal threads may be close to the number of 5*CPUs.  --&gt;</span></span><br><span class="line">  <span class="comment">&lt;!-- In an application that frequently blocks, then maximal      --&gt;</span></span><br><span class="line">  <span class="comment">&lt;!-- threads should be set as high as possible given the memory  --&gt;</span></span><br><span class="line">  <span class="comment">&lt;!-- available.                                                  --&gt;</span></span><br><span class="line">  <span class="comment">&lt;!--                                                             --&gt;</span></span><br><span class="line">  <span class="comment">&lt;!-- Consult the javadoc of o.e.j.util.thread.QueuedThreadPool   --&gt;</span></span><br><span class="line">  <span class="comment">&lt;!-- for all configuration that may be set here.                 --&gt;</span></span><br><span class="line">  <span class="comment">&lt;!-- =========================================================== --&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">New</span> <span class="attr">id</span>=<span class="string">&quot;threadPool&quot;</span> <span class="attr">class</span>=<span class="string">&quot;org.eclipse.jetty.util.thread.QueuedThreadPool&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">Set</span> <span class="attr">name</span>=<span class="string">&quot;minThreads&quot;</span> <span class="attr">type</span>=<span class="string">&quot;int&quot;</span>&gt;</span><span class="tag">&lt;<span class="name">Property</span> <span class="attr">name</span>=<span class="string">&quot;jetty.threadPool.minThreads&quot;</span> <span class="attr">deprecated</span>=<span class="string">&quot;threads.min&quot;</span> <span class="attr">default</span>=<span class="string">&quot;10&quot;</span>/&gt;</span><span class="tag">&lt;/<span class="name">Set</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">Set</span> <span class="attr">name</span>=<span class="string">&quot;maxThreads&quot;</span> <span class="attr">type</span>=<span class="string">&quot;int&quot;</span>&gt;</span><span class="tag">&lt;<span class="name">Property</span> <span class="attr">name</span>=<span class="string">&quot;jetty.threadPool.maxThreads&quot;</span> <span class="attr">deprecated</span>=<span class="string">&quot;threads.max&quot;</span> <span class="attr">default</span>=<span class="string">&quot;200&quot;</span>/&gt;</span><span class="tag">&lt;/<span class="name">Set</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">Set</span> <span class="attr">name</span>=<span class="string">&quot;reservedThreads&quot;</span> <span class="attr">type</span>=<span class="string">&quot;int&quot;</span>&gt;</span><span class="tag">&lt;<span class="name">Property</span> <span class="attr">name</span>=<span class="string">&quot;jetty.threadPool.reservedThreads&quot;</span> <span class="attr">default</span>=<span class="string">&quot;-1&quot;</span>/&gt;</span><span class="tag">&lt;/<span class="name">Set</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">Set</span> <span class="attr">name</span>=<span class="string">&quot;idleTimeout&quot;</span> <span class="attr">type</span>=<span class="string">&quot;int&quot;</span>&gt;</span><span class="tag">&lt;<span class="name">Property</span> <span class="attr">name</span>=<span class="string">&quot;jetty.threadPool.idleTimeout&quot;</span> <span class="attr">deprecated</span>=<span class="string">&quot;threads.timeout&quot;</span> <span class="attr">default</span>=<span class="string">&quot;60000&quot;</span>/&gt;</span><span class="tag">&lt;/<span class="name">Set</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">Set</span> <span class="attr">name</span>=<span class="string">&quot;detailedDump&quot;</span> <span class="attr">type</span>=<span class="string">&quot;boolean&quot;</span>&gt;</span><span class="tag">&lt;<span class="name">Property</span> <span class="attr">name</span>=<span class="string">&quot;jetty.threadPool.detailedDump&quot;</span> <span class="attr">default</span>=<span class="string">&quot;false&quot;</span>/&gt;</span><span class="tag">&lt;/<span class="name">Set</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">New</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">Configure</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>配合源码文件<code>QueuedThreadPool</code>可以看到</p>
+<p> <img src="/assets/blogImg/jetty_queuedThreadPool.png" alt="jetty_queuedThreadPool"></p>
+<p>启动时会生成<code>$&#123;minThreads&#125;个qtp线程</code>，但是实际上看代码会再启动<code>n个idle</code>线程。如下图所示：图中启动了3个，这个<code>idleThread</code>的数量由jetty启动时<code>_job</code>任务队列的长度以及进入循环的次数决定。</p>
+<p><img src="/assets/blogImg/jetty_start.png" alt="jetty_start"></p>
+<p>Jetty <code>QueuedThreadPool</code>初始化时生成<code>idleThread</code>的代码</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> Runnable _runnable = <span class="keyword">new</span> Runnable()</span><br><span class="line">&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">boolean</span> idle = <span class="keyword">false</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span></span><br><span class="line">        &#123;</span><br><span class="line">            Runnable job = _jobs.poll();</span><br><span class="line">            <span class="keyword">if</span> (job != <span class="keyword">null</span> &amp;&amp; _threadsIdle.get() == <span class="number">0</span>)</span><br><span class="line">                startThreads(<span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">            <span class="keyword">while</span> (<span class="keyword">true</span>)</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="keyword">if</span> (job == <span class="keyword">null</span>)</span><br><span class="line">                &#123;</span><br><span class="line">                    <span class="keyword">if</span> (!idle)</span><br><span class="line">                    &#123;</span><br><span class="line">                        idle = <span class="keyword">true</span>;</span><br><span class="line">                        _threadsIdle.incrementAndGet();</span><br><span class="line">                    &#125;</span><br><span class="line"></span><br><span class="line">                    <span class="keyword">if</span> (_idleTimeout &lt;= <span class="number">0</span>)</span><br><span class="line">                        job = _jobs.take();</span><br><span class="line">                    <span class="keyword">else</span></span><br><span class="line">                    &#123;</span><br><span class="line">                        <span class="comment">// maybe we should shrink?</span></span><br><span class="line">                        <span class="keyword">int</span> size = _threadsStarted.get();</span><br><span class="line">                        <span class="keyword">if</span> (size &gt; _minThreads)</span><br><span class="line">                        &#123;</span><br><span class="line">                            <span class="keyword">long</span> last = _lastShrink.get();</span><br><span class="line">                            <span class="keyword">long</span> now = System.nanoTime();</span><br><span class="line">                            <span class="keyword">if</span> (last == <span class="number">0</span> || (now - last) &gt; TimeUnit.MILLISECONDS.toNanos(_idleTimeout))</span><br><span class="line">                            &#123;</span><br><span class="line">                                <span class="keyword">if</span> (_lastShrink.compareAndSet(last, now))</span><br><span class="line">                                    <span class="keyword">break</span>;</span><br><span class="line">                            &#125;</span><br><span class="line">                        &#125;</span><br><span class="line"></span><br><span class="line">                        job = _jobs.poll(_idleTimeout, TimeUnit.MILLISECONDS);</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                <span class="comment">// run job</span></span><br><span class="line">                <span class="keyword">if</span> (job != <span class="keyword">null</span>)</span><br><span class="line">                &#123;</span><br><span class="line">                    <span class="keyword">if</span> (idle)</span><br><span class="line">                    &#123;</span><br><span class="line">                        idle = <span class="keyword">false</span>;</span><br><span class="line">                        <span class="keyword">if</span> (_threadsIdle.decrementAndGet() == <span class="number">0</span>)</span><br><span class="line">                            startThreads(<span class="number">1</span>);</span><br><span class="line">                    &#125;</span><br><span class="line"></span><br><span class="line">                    <span class="keyword">if</span> (LOG.isDebugEnabled())</span><br><span class="line">                        LOG.debug(<span class="string">&quot;run &#123;&#125;&quot;</span>, job);</span><br><span class="line">                    runJob(job);</span><br><span class="line">                    <span class="keyword">if</span> (LOG.isDebugEnabled())</span><br><span class="line">                        LOG.debug(<span class="string">&quot;ran &#123;&#125;&quot;</span>, job);</span><br><span class="line"></span><br><span class="line">                    <span class="comment">// Clear interrupted status</span></span><br><span class="line">                    Thread.interrupted();</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                <span class="keyword">if</span> (!isRunning())</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">                job = _jobs.poll();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">catch</span> (InterruptedException e)</span><br><span class="line">        &#123;</span><br><span class="line">            LOG.ignore(e);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">catch</span> (Throwable e)</span><br><span class="line">        &#123;</span><br><span class="line">            LOG.warn(String.format(<span class="string">&quot;Unexpected thread death: %s in %s&quot;</span>, <span class="keyword">this</span>, QueuedThreadPool.<span class="keyword">this</span>), e);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">finally</span></span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">if</span> (idle)</span><br><span class="line">                _threadsIdle.decrementAndGet();</span><br><span class="line"></span><br><span class="line">            removeThread(Thread.currentThread());</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (_threadsStarted.decrementAndGet() &lt; getMinThreads())</span><br><span class="line">                startThreads(<span class="number">1</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>P.S. 我们在刚启动的时候能够调用成功正是因为这三个进程没有退出，根据<code>idleTimeout</code>的设置，当<code>60s*n</code>的空闲时间时间过去后，这3个线程也依次被销毁，没有空闲的线程供外部请求使用了，jetty容器对于我们而言也就没有响应了，所以增加<code>idleTimeout</code>也是可以续命的 :)，不过这是后话了。</p>
+<p>同时看代码<code>AbstractConnector</code>可以看到，16核心的CPU可以会启动<code>2个</code>acceptor (8个核心则只有1个acceptor)</p>
+<p><img src="/assets/blogImg/jetty_abstractConnector.png" alt="jetty_abstractConnector"></p>
+<p>看代码<code>SelectorManager</code>可知，16核心的CPU可以会启动<code>8个</code>selector(8个核心则只有4个selector)</p>
+<p><img src="/assets/blogImg/jetty_selectorManager.png" alt="jetty_selectorManager"></p>
+<p>所以理论上，如果没有空闲线程(10 - 2 - 8 = 0)，jetty一定会夯死。github上开发人员的<a target="_blank" rel="noopener" href="https://github.com/eclipse/jetty.project/issues/3550">修复方案</a>是保证时刻有一个<code>idleThread</code>。</p>
+<p><img src="/assets/blogImg/github_jetty_fixed.png" alt="github_jetty_fixed"></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Java/" rel="tag"># Java</a>
+              <a href="/tags/Jetty/" rel="tag"># Jetty</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/03/21/%E5%A4%A7%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/" rel="prev" title="大数据处理基本概念">
+      <i class="fa fa-chevron-left"></i> 大数据处理基本概念
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%97%AE%E9%A2%98%E6%8F%8F%E8%BF%B0"><span class="nav-number">1.</span> <span class="nav-text">问题描述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8E%9F%E5%9B%A0%E5%88%86%E6%9E%90"><span class="nav-number">2.</span> <span class="nav-text">原因分析</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">LEEZY</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">37</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">LEEZY</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

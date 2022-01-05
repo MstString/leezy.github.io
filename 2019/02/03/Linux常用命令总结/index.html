@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.leezy.top","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="常用的CentOS及Ubuntu命令总结，方便查看与记忆。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Linux常用命令总结">
+<meta property="og:url" content="https://www.leezy.top/2019/02/03/Linux%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4%E6%80%BB%E7%BB%93/index.html">
+<meta property="og:site_name" content="SAKURA">
+<meta property="og:description" content="常用的CentOS及Ubuntu命令总结，方便查看与记忆。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://www.leezy.top/assets/blogImg/VirtualBox_NetWork.png">
+<meta property="og:image" content="https://www.leezy.top/assets/blogImg/VirtualBox_Host_Only.png">
+<meta property="article:published_time" content="2019-02-03T06:27:03.000Z">
+<meta property="article:modified_time" content="2021-12-08T14:26:00.399Z">
+<meta property="article:author" content="LEEZY">
+<meta property="article:tag" content="Linux">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://www.leezy.top/assets/blogImg/VirtualBox_NetWork.png">
+
+<link rel="canonical" href="https://www.leezy.top/2019/02/03/Linux%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4%E6%80%BB%E7%BB%93/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Linux常用命令总结 | SAKURA</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">SAKURA</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://www.leezy.top/2019/02/03/Linux%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4%E6%80%BB%E7%BB%93/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="LEEZY">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="SAKURA">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Linux常用命令总结
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-02-03 14:27:03" itemprop="dateCreated datePublished" datetime="2019-02-03T14:27:03+08:00">2019-02-03</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-12-08 22:26:00" itemprop="dateModified" datetime="2021-12-08T22:26:00+08:00">2021-12-08</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>常用的CentOS及Ubuntu命令总结，方便查看与记忆。</p>
+<span id="more"></span>
+<h2 id="Linux常用命令"><a href="#Linux常用命令" class="headerlink" title="Linux常用命令"></a>Linux常用命令</h2><p>(1)查看DNS记录的命令（A记录、MX记录）</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">yum install bind-utils</span><br><span class="line"></span><br><span class="line">dig +noall +answer www.leezy.top</span><br></pre></td></tr></table></figure>
+<p>(2) 查看端口常用命令：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">netstat -lnp|grep 80</span><br></pre></td></tr></table></figure>
+<p>(3) 查看版本</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ll /etc/*centos*</span><br><span class="line">cat /etc/centos-release</span><br></pre></td></tr></table></figure>
+<p>(4) 查看内核<br>经常在执行 yum udpate 命令后CentOS会出现多个启动项，所以我们经常要删除：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 查看当前系统正在使用的内核版本</span></span><br><span class="line">uname -a</span><br><span class="line"><span class="meta">#</span><span class="bash"> 查看当前系统的全部Kernel</span></span><br><span class="line">rpm -q kernel</span><br><span class="line"><span class="meta">#</span><span class="bash"> 删除多余的内核启动项</span></span><br><span class="line">yum remove kernel-3.10.0-957.el7.x86_64</span><br><span class="line"><span class="meta">#</span><span class="bash"> 重新启动</span></span><br><span class="line">reboot</span><br></pre></td></tr></table></figure>
+<p>(5) 修改主机名</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">hostnamectl set-hostname NAME</span><br><span class="line"><span class="meta">#</span><span class="bash"> 重启机器</span></span><br><span class="line">reboot</span><br></pre></td></tr></table></figure>
+<h2 id="CentOS-Minimal版本配置"><a href="#CentOS-Minimal版本配置" class="headerlink" title="CentOS Minimal版本配置"></a>CentOS Minimal版本配置</h2><h3 id="换源："><a href="#换源：" class="headerlink" title="换源："></a>换源：</h3><p><a target="_blank" rel="noopener" href="http://mirrors.163.com/.help/centos.html">http://mirrors.163.com/.help/centos.html</a></p>
+<h3 id="安装软件"><a href="#安装软件" class="headerlink" title="安装软件"></a>安装软件</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">yum install net-tools</span><br><span class="line">yum install wget</span><br><span class="line">yum install vim</span><br></pre></td></tr></table></figure>
+<h3 id="配置JAVA环境变量"><a href="#配置JAVA环境变量" class="headerlink" title="配置JAVA环境变量"></a>配置JAVA环境变量</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/profile</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 在文件末尾添加环境配置</span></span><br><span class="line">export JAVA_HOME=/usr/jdk-11.0.2</span><br><span class="line">export CLASSPATH=.:$&#123;JAVA_HOME&#125;/jre/lib/rt.jar:$&#123;JAVA_HOME&#125;/lib/dt.jar:$&#123;JAVA_HOME&#125;/lib/tools.jar</span><br><span class="line">export PATH=$PATH:$&#123;JAVA_HOME&#125;/bin</span><br><span class="line"><span class="meta">#</span><span class="bash"> 使新的环境生效</span></span><br><span class="line">source /etc/profile</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 当Java版本更新时，仅仅修改JAVA_HOME的路径是不够的，需要删除链接</span></span><br><span class="line">which java</span><br><span class="line">/usr/jdk_xxx/bin/java</span><br><span class="line"></span><br><span class="line">which javac </span><br><span class="line">/usr/jdk_xxx_/bin/javac</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 删除链接</span></span><br><span class="line">rm -rf /usr/jdk_xxx/bin/java</span><br><span class="line">rm -rf /usr/jdk_xxx_/bin/javac</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 再执行使得新环境生效</span></span><br><span class="line">source /etc/profile</span><br></pre></td></tr></table></figure>
+
+<h3 id="GitLab-CE版安装"><a href="#GitLab-CE版安装" class="headerlink" title="GitLab CE版安装"></a>GitLab CE版安装</h3><p>新建 /etc/yum.repos.d/gitlab-ce.repo，内容为：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[gitlab-ce]</span><br><span class="line">name=Gitlab CE Repository</span><br><span class="line">baseurl=https://mirrors.tuna.tsinghua.edu.cn/gitlab-ce/yum/el$releasever/</span><br><span class="line">gpgcheck=0</span><br><span class="line">enabled=1</span><br></pre></td></tr></table></figure>
+<p>再执行：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">sudo yum install curl openssh-server openssh-clients postfix cronie</span><br><span class="line">sudo service postfix start</span><br><span class="line">systemctl enable postfix.service</span><br><span class="line">(yum install lokkit)</span><br><span class="line">sudo lokkit -s http -s ssh</span><br><span class="line"></span><br><span class="line">sudo yum makecache</span><br><span class="line">sudo yum install gitlab-ce</span><br><span class="line"></span><br><span class="line">[[启动GitLab]]</span><br><span class="line">sudo gitlab-ctl reconfigure</span><br></pre></td></tr></table></figure>
+
+<h3 id="常用的网络配置"><a href="#常用的网络配置" class="headerlink" title="常用的网络配置"></a>常用的网络配置</h3><p>修改DNS(貌似会重启失效)</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/resolv.conf</span><br></pre></td></tr></table></figure>
+
+<p>修改IP地址</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/sysconfig/network-scripts/ifcfg-enp0s3</span><br></pre></td></tr></table></figure>
+
+<h3 id="清理内存"><a href="#清理内存" class="headerlink" title="清理内存"></a>清理内存</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">echo 3 &gt; /proc/sys/vm/drop_caches</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 查看内存使用情况</span></span><br><span class="line">free -h </span><br></pre></td></tr></table></figure>
+
+<h3 id="Docker安装及配置"><a href="#Docker安装及配置" class="headerlink" title="Docker安装及配置"></a>Docker安装及配置</h3><p>Docker官方文档访问<a target="_blank" rel="noopener" href="https://docs.docker.com/install/linux/docker-ce/ubuntu/[[install-using-the-repository]]">这里</a></p>
+<p>阿里云安装文档<a target="_blank" rel="noopener" href="https://yq.aliyun.com/articles/110806?spm=5176.8351553.0.0.4ef81991AdnpKb">这里</a><br>Docker安装</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 仅公网环境，使用官方安装脚本</span></span><br><span class="line">curl -fsSL https://get.docker.com | bash -s docker --mirror Aliyun</span><br></pre></td></tr></table></figure>
+<p>由于直接使用DockerHub下载的速度很慢，所以可以使用阿里云的容器镜像加速服务,阿里云配置地址访问网址<a target="_blank" rel="noopener" href="https://cr.console.aliyun.com/cn-hangzhou/instances/mirrors">这里</a>：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">sudo mkdir -p /etc/docker</span><br><span class="line">sudo tee /etc/docker/daemon.json &lt;&lt;-&#x27;EOF&#x27;</span><br><span class="line">&#123;</span><br><span class="line">  &quot;registry-mirrors&quot;: [&quot;加速器地址&quot;]</span><br><span class="line">&#125;</span><br><span class="line">EOF</span><br><span class="line">sudo systemctl daemon-reload</span><br><span class="line">sudo systemctl restart docker</span><br></pre></td></tr></table></figure>
+<p>这样就可以快速的使用Docker pull 等命令了。<br>清理Dcoker 容器：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker system prune</span><br></pre></td></tr></table></figure>
+
+<h3 id="开放防火墙端口"><a href="#开放防火墙端口" class="headerlink" title="开放防火墙端口"></a>开放防火墙端口</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 查看所有开放的端口</span></span><br><span class="line">firewall-cmd --list-ports</span><br><span class="line"><span class="meta">#</span><span class="bash"> --permanent 永久生效</span></span><br><span class="line">firewall-cmd --zone=public --add-port=9092/tcp --permanent</span><br><span class="line"><span class="meta">#</span><span class="bash"> 重新载入</span></span><br><span class="line">firewall-cmd --reload</span><br><span class="line"><span class="meta">#</span><span class="bash"> 查看</span></span><br><span class="line">firewall-cmd --zone=public --query-port=80/tcp</span><br><span class="line"><span class="meta">#</span><span class="bash"> 删除</span></span><br><span class="line">firewall-cmd --zone=public --remove-port=80/tcp --permanent</span><br></pre></td></tr></table></figure>
+
+<h3 id="Putty连接Ubuntu虚拟机"><a href="#Putty连接Ubuntu虚拟机" class="headerlink" title="Putty连接Ubuntu虚拟机"></a>Putty连接Ubuntu虚拟机</h3><blockquote>
+<p>首先确保自己有root权限</p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 设置root密码</span></span><br><span class="line">sudo passwd</span><br></pre></td></tr></table></figure>
+
+<ol>
+<li><p>首先配置Host-Only网卡，然后点击<br><img src="/assets/blogImg/VirtualBox_NetWork.png" alt="VirtualBox 配置"><br><img src="/assets/blogImg/VirtualBox_Host_Only.png" alt="VirtualBox Host Only 配置">  </p>
+</li>
+<li><p>登入虚拟机使用<code>ifconfig -a</code>命令, 发现会有三个网卡(lo-本地、enp0s3-NET、enp0s8-Host-Only), 但是Host-Only没有IP地址</p>
+</li>
+<li><p>输入<code>sudo dhclient enp0s8</code>, 即可获取IP地址</p>
+</li>
+<li><p>Ubuntu 18.0新版后, <code>/etc/network/interfaces</code>的文件配置已经被弃用, <code>vim /etc/netplan/50-cloud-init.yaml</code></p>
+</li>
+</ol>
+<p>配置如下：</p>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># This file is generated from information provided by</span></span><br><span class="line"><span class="comment"># the datasource.  Changes to it will not persist across an instance.</span></span><br><span class="line"><span class="comment"># To disable cloud-init&#x27;s network configuration capabilities, write a file</span></span><br><span class="line"><span class="comment"># /etc/cloud/cloud.cfg.d/99-disable-network-config.cfg with the following:</span></span><br><span class="line"><span class="comment"># network: &#123;config: disabled&#125;</span></span><br><span class="line"><span class="attr">network:</span></span><br><span class="line">    <span class="attr">ethernets:</span></span><br><span class="line">        <span class="attr">enp0s3:</span></span><br><span class="line">            <span class="attr">dhcp4:</span> <span class="literal">true</span></span><br><span class="line">        <span class="attr">enp0s8:</span></span><br><span class="line">            <span class="attr">dhcp4:</span> <span class="literal">false</span></span><br><span class="line">            <span class="attr">addresses:</span> [<span class="number">192.168</span><span class="number">.56</span><span class="number">.101</span><span class="string">/24</span>]</span><br><span class="line">            <span class="attr">nameservers:</span> &#123;&#125;</span><br><span class="line">            <span class="attr">optional:</span> <span class="literal">true</span></span><br><span class="line">    <span class="attr">version:</span> <span class="number">2</span></span><br><span class="line"><span class="string">~</span></span><br></pre></td></tr></table></figure>
+<p>修改完以后直接执行 <code>sudo netplan apply</code></p>
+<ol start="5">
+<li>重启ssh服务 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">service ssh restart</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h3 id="Linux运维常用命令"><a href="#Linux运维常用命令" class="headerlink" title="Linux运维常用命令"></a>Linux运维常用命令</h3><ul>
+<li><p>Linux文件管理<br>df 检查文件系统的磁盘空间占用情况，删除的文件但是还有程序在使用的时候会进行显示。这个命令会比<code>du</code>命令大。<br>du 对文件和目录磁盘使用的空间查看，不包含已经删除的文件，命令执行结果小于或等于<code>df</code>。<br>常用的命令如下</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 以GB MB KB的格式查看文件</span></span><br><span class="line">df -h</span><br><span class="line"><span class="meta">#</span><span class="bash"> 查看文件节点数</span></span><br><span class="line">df -i</span><br></pre></td></tr></table></figure></li>
+<li><p>Linux文件压缩与解压</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 文件压缩 tar -zcvf &lt;压缩包名称&gt; &lt;要压缩的文件路径或者文件名&gt;</span></span><br><span class="line">tar -zcvf my.tar.gz my.txt</span><br><span class="line"><span class="meta">#</span><span class="bash"> 文件解压</span></span><br><span class="line">tar -xzvf my.tar.gz</span><br></pre></td></tr></table></figure></li>
+<li><p>xargs 将命令输出的结果作为一个参数传递给另一个命令</p>
+</li>
+</ul>
+<p>找出/目录下以.conf结尾的文件，并进行文件分类。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">find / -name *.conf -type f -print | xargs file</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>命令或者脚本后台运行<br>数据库的导入导出操作，耗时较久。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nohup mysqldump -uroot -pXXX --all-databases &gt; ./alldatabases.sql &amp;</span><br></pre></td></tr></table></figure>
+<p>命令后台执行的结果会在命令执行的当前目录下留下一个nohup.out文件，查看这个文件就可以知道命令有没有执行报错等信息。</p>
+</li>
+<li><p>找出当前系统资源使用量较高的进程</p>
+</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 内存使用量前3</span></span><br><span class="line">ps -ef | sort -rnk 4 | head -3</span><br><span class="line"><span class="meta">#</span><span class="bash"> CPU使用量前3</span></span><br><span class="line">ps -ef | sort -rnk 3 | head -3</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>VIM 使用技巧</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 显示当前行数</span></span><br><span class="line">:set nu</span><br><span class="line"><span class="meta">#</span><span class="bash"> 跳到指定行 - 80</span></span><br><span class="line">:80gg</span><br><span class="line">:80G</span><br><span class="line"><span class="meta">#</span><span class="bash"> 第一行</span></span><br><span class="line">:gg</span><br><span class="line"><span class="meta">#</span><span class="bash"> 最后一行</span></span><br><span class="line">:G</span><br></pre></td></tr></table></figure></li>
+<li><p>wc 命令</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 统计文件的 行数，单词数，字节数</span></span><br><span class="line">wc &lt;file&gt;</span><br><span class="line"><span class="meta">#</span><span class="bash"> 统计行数</span></span><br><span class="line">wc -l &lt;file&gt;</span><br></pre></td></tr></table></figure></li>
+<li><p>sh -c<br>它可以让 bash 将一个字串作为完整的命令来执行。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sh -c</span><br></pre></td></tr></table></figure></li>
+<li><p>netstat命令</p>
+</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 查看指定端口占用情况</span></span><br><span class="line">netstat -anp | grep -i &quot;8080&quot;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>curl用法</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">-X 指定请求方法</span><br><span class="line">-x 指定HTTP请求的代理</span><br><span class="line">-H 指定请求标头</span><br><span class="line">-d 发送POST请求提交的数据，使用-d参数后，会自动将请求转为POST，HTTP请求会自动加上标头Content-Type:application/x-www-form-urlencoded，可省略-X POST</span><br><span class="line">-v 显示http通信的整个过程</span><br><span class="line">-u 设置服务器认证的用户名和密码</span><br><span class="line"></span><br><span class="line">-i 显示Response头信息，并打印源码</span><br><span class="line">-I 显示Response头信息，不打印源码</span><br><span class="line"></span><br><span class="line">-s 不输出错误和进度信息</span><br><span class="line">-S 指定只输出错误信息</span><br><span class="line"></span><br><span class="line">-L 自动跳转，curl默认不跟随跳转</span><br><span class="line">-k 跳过SSL检测</span><br><span class="line"></span><br><span class="line">-o 文件名 保存</span><br><span class="line">-O 将URL的最后部分当作文件名保存</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>grep 命令</li>
+</ul>
+<p>-i 忽略大小写<br>-n 显示结果所在行号<br>-v 反向查询<br>-e 多个选项匹配<br>-w 匹配整个单词，如果字符串中包含整个单词，并不匹配<br>-E 对应正则表达式，也可以实现或的操作<br>-a 让二进制文件等价于文本文件</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 多个 -e 实现or的操作</span></span><br><span class="line">grep -e true -e false test.txt</span><br><span class="line"><span class="meta">#</span><span class="bash"> &lt;/dev/tcp/ip/7550是判断ip在7550端口的连通性，将结果输出到/dev/null这个黑洞，然后错误信息也输出到这里</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 在Linux中0表示标准输入，1表示标准输出，2表示标准错误</span></span><br><span class="line">sh -c &quot;&lt;/dev/tcp/$local_ip/7550&quot; &gt;/dev/null 2&gt;&amp;1</span><br><span class="line"></span><br><span class="line">grep -a &#x27;^uyun.baseurl=&#x27;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>curl 命令</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 判定指定url的连通性</span></span><br><span class="line">curl -v </span><br><span class="line"><span class="meta">#</span><span class="bash"> 当发生错误的时候返回错误信息</span></span><br><span class="line">curl -sS</span><br></pre></td></tr></table></figure></li>
+<li><p>sed 命令</p>
+</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 将test.txt的<span class="literal">false</span>改为<span class="literal">true</span></span></span><br><span class="line">sed -i `s/false/true/g` test.txt</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>Linux查看CPU、内存</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 查看总内存</span></span><br><span class="line">cat /proc/meminfo | gerp MemTotal</span><br><span class="line"><span class="meta">#</span><span class="bash"> 查看CPU核数</span></span><br><span class="line">grep &#x27;physical id&#x27; /proc/cpuinfo | sort | uniq | wc -l</span><br><span class="line"><span class="meta">#</span><span class="bash"> 查看CPU的型号 - uniq -c 统计出现的次数</span></span><br><span class="line">cat /proc/cpuinfo | grep name | cut -f2 -d: | uniq -c</span><br></pre></td></tr></table></figure></li>
+<li><p>awk 命令</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 根据分隔符查找内容</span></span><br><span class="line">awk -F &#x27;=&#x27; &#x27;&#123;print $1&#125;&#x27;</span><br></pre></td></tr></table></figure></li>
+<li><p>查看进程内存排名</p>
+</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ps -aux --sort --rss</span><br></pre></td></tr></table></figure>
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Linux/" rel="tag"># Linux</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/12/18/SpringCloud%E5%AD%A6%E4%B9%A0/" rel="prev" title="《重新定义SpringCloud实战》读书笔记">
+      <i class="fa fa-chevron-left"></i> 《重新定义SpringCloud实战》读书笔记
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2019/02/26/Shiro%E5%AE%89%E5%85%A8%E6%A1%86%E6%9E%B6%E7%AE%80%E4%BB%8B/" rel="next" title="Shiro 安全框架学习笔记">
+      Shiro 安全框架学习笔记 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Linux%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4"><span class="nav-number">1.</span> <span class="nav-text">Linux常用命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CentOS-Minimal%E7%89%88%E6%9C%AC%E9%85%8D%E7%BD%AE"><span class="nav-number">2.</span> <span class="nav-text">CentOS Minimal版本配置</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8D%A2%E6%BA%90%EF%BC%9A"><span class="nav-number">2.1.</span> <span class="nav-text">换源：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E8%A3%85%E8%BD%AF%E4%BB%B6"><span class="nav-number">2.2.</span> <span class="nav-text">安装软件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AEJAVA%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F"><span class="nav-number">2.3.</span> <span class="nav-text">配置JAVA环境变量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#GitLab-CE%E7%89%88%E5%AE%89%E8%A3%85"><span class="nav-number">2.4.</span> <span class="nav-text">GitLab CE版安装</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B8%B8%E7%94%A8%E7%9A%84%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE"><span class="nav-number">2.5.</span> <span class="nav-text">常用的网络配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B8%85%E7%90%86%E5%86%85%E5%AD%98"><span class="nav-number">2.6.</span> <span class="nav-text">清理内存</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Docker%E5%AE%89%E8%A3%85%E5%8F%8A%E9%85%8D%E7%BD%AE"><span class="nav-number">2.7.</span> <span class="nav-text">Docker安装及配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BC%80%E6%94%BE%E9%98%B2%E7%81%AB%E5%A2%99%E7%AB%AF%E5%8F%A3"><span class="nav-number">2.8.</span> <span class="nav-text">开放防火墙端口</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Putty%E8%BF%9E%E6%8E%A5Ubuntu%E8%99%9A%E6%8B%9F%E6%9C%BA"><span class="nav-number">2.9.</span> <span class="nav-text">Putty连接Ubuntu虚拟机</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Linux%E8%BF%90%E7%BB%B4%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4"><span class="nav-number">2.10.</span> <span class="nav-text">Linux运维常用命令</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">LEEZY</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">37</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">LEEZY</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

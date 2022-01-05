@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.leezy.top","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="MySQL高可用中间件方案选型，稍微总结一下。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MySQL高可用中间件方案选型">
+<meta property="og:url" content="https://www.leezy.top/2021/01/15/MySQL%E9%AB%98%E5%8F%AF%E7%94%A8%E4%B8%AD%E9%97%B4%E4%BB%B6%E6%96%B9%E6%A1%88/index.html">
+<meta property="og:site_name" content="SAKURA">
+<meta property="og:description" content="MySQL高可用中间件方案选型，稍微总结一下。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://www.leezy.top/assets/blogImg/mha_solution.png">
+<meta property="og:image" content="https://www.leezy.top/assets/blogImg/innodb_cluster_overview.png">
+<meta property="og:image" content="https://www.leezy.top/assets/blogImg/mariadb_maxscale.png">
+<meta property="og:image" content="https://www.leezy.top/assets/blogImg/arkproxy.png">
+<meta property="article:published_time" content="2021-01-14T16:22:21.000Z">
+<meta property="article:modified_time" content="2021-12-08T14:26:00.379Z">
+<meta property="article:author" content="LEEZY">
+<meta property="article:tag" content="MySQL">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://www.leezy.top/assets/blogImg/mha_solution.png">
+
+<link rel="canonical" href="https://www.leezy.top/2021/01/15/MySQL%E9%AB%98%E5%8F%AF%E7%94%A8%E4%B8%AD%E9%97%B4%E4%BB%B6%E6%96%B9%E6%A1%88/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>MySQL高可用中间件方案选型 | SAKURA</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">SAKURA</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://www.leezy.top/2021/01/15/MySQL%E9%AB%98%E5%8F%AF%E7%94%A8%E4%B8%AD%E9%97%B4%E4%BB%B6%E6%96%B9%E6%A1%88/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="LEEZY">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="SAKURA">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          MySQL高可用中间件方案选型
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-01-15 00:22:21" itemprop="dateCreated datePublished" datetime="2021-01-15T00:22:21+08:00">2021-01-15</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-12-08 22:26:00" itemprop="dateModified" datetime="2021-12-08T22:26:00+08:00">2021-12-08</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>MySQL高可用中间件方案选型，稍微总结一下。</p>
+<span id="more"></span>
+
+
+<h3 id="常用MySQL高可用中间件方案"><a href="#常用MySQL高可用中间件方案" class="headerlink" title="常用MySQL高可用中间件方案"></a>常用MySQL高可用中间件方案</h3><p><img src="/assets/blogImg/mha_solution.png" alt="MySQL High Available Cluster"></p>
+<h4 id="MySQL-Router"><a href="#MySQL-Router" class="headerlink" title="MySQL Router"></a>MySQL Router</h4><p>  MySQL Router is part of InnoDB Cluster and is lightweight middleware that provides transparent routing between your application and back-end MySQL Servers. It is used for a wide variety of use cases, such as providing high availability and scalability by routing database traffic to appropriate back-end MySQL servers. The pluggable architecture also enables developers to extend MySQL Router for custom use cases.</p>
+<p>Mysql InnoDB Cluster 主要由三个模块构成：</p>
+<p><img src="/assets/blogImg/innodb_cluster_overview.png" alt="MySQL InnoDB Cluster"></p>
+<ol>
+<li>支持Group Replication 功能的Mysql Server(version &gt;= 5.7.17)，模块主要功能在于实现了组内通信，故障转移（英语：failover, 即当活动的服务或应用意外终止时，快速启用冗余或备用的服务器、系统、硬件或者网络接替它们工作）、故障恢复（英语：failback，将系统，组件，服务恢复到故障之前的组态）</li>
+<li>Mysql-shell：实现快速部署，主要提供了一套AdminAPI，可以自动化配置Group Replication，让我们无须再手动配置cluster中group replication相关参数。</li>
+<li>Mysql-router：内置读写分离，负载均衡。自动根据Mysql InnoDB Cluster中的metadata自动调整。</li>
+</ol>
+<p>优点：<br>其实也就是InnoDB Cluster的优点<br>缺点：<br>Mysql-router没有<code>SQL审计</code>，<code>限流</code>，<code>分库分表</code>的功能，但是可以通过C来写插件进行扩展；<br>非<code>InnoDB Cluster</code>架构下，主库和从库的拓扑变更需要修改配置并重启。</p>
+<h4 id="Maxscale"><a href="#Maxscale" class="headerlink" title="Maxscale"></a>Maxscale</h4><p><img src="/assets/blogImg/mariadb_maxscale.png" alt="mariadb_maxscale"><br>优点：</p>
+<ul>
+<li><p>支持读写分离，高可用，故障转移</p>
+</li>
+<li><p>提供了监控能力</p>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener" href="https://mariadb.com/wp-content/uploads/2019/03/mariadb-maxscale_datasheet_1014.pdf">官网介绍</a><br>缺点：<br>BSL协议，在生产环境，如果后端超过3个MariaDB实例提供服务，就必须购买商业授权。<br>Failover以及Switchover和Rejoin仅支持基于GTID(全局事务ID)的复制一起使用，并且仅适用于简单的一主多从拓扑架构：即1个master后面跟着多个slave。需要把loss-less无损半同步复制(semi replication)开启，参数rpl_semi_sync_master_wait_point=AFTER_SYNC，确保slave已经接收到了master的binlog，因为master宕机，MaxScale无法远程拷贝scp那一缺失的binlog，那么数据就出现不一致了。</p>
+<h4 id="ProxySQL"><a href="#ProxySQL" class="headerlink" title="ProxySQL"></a>ProxySQL</h4><p>C++开发，轻量级的开源软件，配置数据基于SQLite存储，Proxysql读写分离的中间件，支持高可用 主从\ MGR \ PXC等环境，并提供连接池、缓存、日志记录等功能。<br>优点：</p>
+<ul>
+<li>支持多路复用连接池</li>
+<li>自动下线后端DB； 延迟超过阀值、 ping 延迟超过阀值、网络不通或宕机</li>
+<li>可缓存查询结果</li>
+<li>强大的规则路由引擎；实现读写分离、 查询重写、sql流量镜像</li>
+<li>提供了监控能力</li>
+</ul>
+<p>缺点：<br>例子少，只有官方文档。用户不如MaxScale多。</p>
+<h4 id="ArkProxy"><a href="#ArkProxy" class="headerlink" title="ArkProxy"></a>ArkProxy</h4><p><img src="/assets/blogImg/arkproxy.png" alt="ArkProxy"></p>
+<p>优点：</p>
+<ul>
+<li>透明读写分离和支持 Hint 分发</li>
+<li>100%兼容MySQL语法，用户友好</li>
+<li>自动负载均衡、权重分发，灵活控制数据库流量</li>
+<li>内部实现消息压缩，同时实现用户连接数限制和统计</li>
+<li>Trace智能统计分析及审计，支持将访问请求对接到Kafka，供大数据系统统计分析</li>
+<li>内置高效连接池，在高并发时大大提升数据库集群的处理能力</li>
+<li>提供自定义一致性读和自路由一致性读来满足数据的强一致性读需求</li>
+<li>自定义SQL 拦截，可以拦截危险SQL</li>
+<li>配置文件可动态加载，避免重启</li>
+<li>Percona 分支数据库支持无任何权限侵入直接上线的功能</li>
+</ul>
+<p>缺点：<br>貌似上述功能都要依赖他们的体系。</p>
+<h4 id="MyCat"><a href="#MyCat" class="headerlink" title="MyCat"></a>MyCat</h4><p>优点：</p>
+<ul>
+<li>支持 SQL 92标准</li>
+<li>支持Mysql集群，可以作为Proxy使用</li>
+<li>支持JDBC连接ORACLE、DB2、SQL Server，将其模拟为MySQL Server使用</li>
+<li>支持galera for mysql集群，percona-cluster或者mariadb cluster，提供高可用性数据分片集群</li>
+<li>自动故障切换，高可用性</li>
+<li>支持读写分离，支持Mysql双主多从，以及一主多从的模式</li>
+<li>支持全局表，数据自动分片到多个节点，用于高效表关联查询</li>
+<li>支持独有的基于E-R 关系的分片策略，实现了高效的表关联查询</li>
+<li>多平台支持，部署和实施简单</li>
+</ul>
+<p>缺点：<br>MyCat2已经出现了，社区活跃度不太稳定，感觉企业里使用的不多。同时，对数据查询语句作拆分本身就是一个比较头疼的事情，可能会有很多bug。增加节点需要手动修改schema.xml配置文件，然后做一次reload操作等等。schema.xml配置简直不能忍。</p>
+<h4 id="Apache-shardingsphere-JDBC"><a href="#Apache-shardingsphere-JDBC" class="headerlink" title="Apache shardingsphere-JDBC"></a>Apache shardingsphere-JDBC</h4><p>ShardingSphere-JDBC 是 Apache ShardingSphere 的第一个产品，也是 Apache ShardingSphere 的前身。 定位为轻量级 Java 框架，在 Java 的 JDBC 层提供的额外服务。 它使用客户端直连数据库，以 jar 包形式提供服务，无需额外部署和依赖，可理解为增强版的 JDBC 驱动，完全兼容 JDBC 和各种 ORM 框架。</p>
+<ul>
+<li>适用于任何基于 JDBC 的 ORM 框架，如：JPA, Hibernate, Mybatis, Spring JDBC Template 或直接使用 JDBC。</li>
+<li>支持任何第三方的数据库连接池，如：DBCP, C3P0, BoneCP, Druid, HikariCP 等。</li>
+<li>支持任意实现 JDBC 规范的数据库，目前支持 MySQL，Oracle，SQLServer，PostgreSQL 以及任何遵循 SQL92 标准的数据库。</li>
+<li>自动节点克隆：在新增节点，或者停机维护时，增量数据或者基础数据不需要人工手动备份提供，Galera Cluster会自动拉取在线节点数据，最终集群会变为一致。</li>
+<li>对应用透明：集群的维护，对应用程序是透明的，几乎感觉不到。<br>以上几点，足以说明Galera Cluster是一个既稳健，又在数据一致性、完整性及高性能方面有出色表现的高可用解决方案。</li>
+</ul>
+<h4 id="Galera-Cluster架构"><a href="#Galera-Cluster架构" class="headerlink" title="Galera Cluster架构"></a>Galera Cluster架构</h4><p>解决方案：<br>不做读写分离的话 HA + Galera Cluster<br>集成了Galera插件的MySQL集群，是一种新型的，数据不共享的，高度冗余的高可用方案，目前Galera Cluster有两个版本，分别是Percona Xtradb Cluster及MariaDB Cluster，都是基于Galera的，Galera Cluster架构就是multi-master的集群架构。</p>
+<p>优点：</p>
+<ul>
+<li>多主架构：真正的多点读写的集群，在任何时候读写数据，都是最新的。</li>
+<li>同步复制：集群不同节点之间数据同步，没有延迟，在数据库挂掉之后，数据不会丢失。异步复制中，主库将数据更新传播给从库后立即提交事务，而不论从库是否成功读取或重放数据变化。这种情况下，在主库事务提交后的短时间内，主从库数据并不一致。同步复制时，主库的单个更新事务需要在所有从库上同步更新。换句话说，当主库提交事务时，集群中所有节点的数据保持一致。</li>
+<li>并发复制：从节点在APPLY数据时，支持并行执行，有更好的性能表现。</li>
+<li>故障切换：在出现数据库故障时，因为支持多点写入，切的非常容易。</li>
+<li>热插拔：在服务期间，如果数据库挂了，只要监控程序发现的够快，不可服务时间就会非常少。在节点故障期间，节点本身对集群的影响非常小。<br>个人感觉适合交易类的场景，是一个可以保证数据强一致性的架构。</li>
+</ul>
+<p>缺点：<br>比较新型的架构使用者较少，还在发展。</p>
+<h4 id="MySQL-Group-Replication架构"><a href="#MySQL-Group-Replication架构" class="headerlink" title="MySQL Group Replication架构"></a>MySQL Group Replication架构</h4><p>MGR是以Plugin的形式嵌入在MySQL实例中，插件内部实现了冲突检测、Paxos协议通信等。</p>
+<p>MySQL异步复制：</p>
+<p>master事务的提交不需要经过slave的确认，slave是否接收到master的binlog，master并不care。slave接收到master binlog后先写relay log，最后异步地去执行relay log中的sql应用到自身。由于master的提交不需要确保slave relay log是否被正确接受，当slave接受master binlog失败或者relay log应用失败，master无法感知。假设master发生宕机并且binlog还没来得及被slave接收，而切换程序将slave提升为新的master，就会出现数据不一致的情况！另外，在高并发的情况下，传统的主从复制，从节点可能会与主产生较大的延迟。</p>
+<p>MySQL半同步复制：</p>
+<p>半同步复制是传统异步复制的改进，在master事务的commit之前，必须确保一个slave收到relay log并且响应给master以后，才能进行事务的commit。但是slave对于relay log的应用仍然是异步进行的</p>
+<p>MGR：</p>
+<p>由若干个节点共同组成一个复制组，一个事务的提交，必须经过组内大多数节点（N / 2 + 1）决议并通过，才能得以提交。<br>缺点：<br>只支持InnoDB存储引擎；<br>必须有主键；<br>必须打开GTID特性，二进制日志格式必须设置为ROW，用于选主与write set;</p>
+<h3 id="MySQL-主从同步配置"><a href="#MySQL-主从同步配置" class="headerlink" title="MySQL 主从同步配置"></a>MySQL 主从同步配置</h3><p>MySQL5.7安装前期准备</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 安装MySQL</span></span><br><span class="line">sudo apt-get update</span><br><span class="line">sudo apt-get install mysql-server</span><br><span class="line"><span class="meta">#</span><span class="bash"> 配置MySQL</span></span><br><span class="line">sudo mysql_secure_installation</span><br><span class="line"><span class="meta">#</span><span class="bash"> 查看密码策略</span>    </span><br><span class="line">SHOW VARIABLES LIKE &#x27;validate_password%&#x27;;</span><br><span class="line"><span class="meta">#</span><span class="bash"> SET global validate_password_policy=LOW;</span></span><br><span class="line">SET global validate_password_length=4;</span><br><span class="line"><span class="meta">#</span><span class="bash"> 查看密码规则 5.7后默认使用auth_socket认证插件</span></span><br><span class="line">SELECT user, authentication_string, plugin, host FROM mysql.user;</span><br><span class="line"><span class="meta">#</span><span class="bash"> 更改策略</span></span><br><span class="line">ALTER USER &#x27;root&#x27;@&#x27;localhost&#x27; IDENTIFIED WITH mysql_native_password BY &quot;root&quot;;</span><br><span class="line"><span class="meta">#</span><span class="bash"> 允许所有host的root用户远程连接</span></span><br><span class="line">GRANT ALL PRIVILEGES ON *.* TO &#x27;root&#x27;@&#x27;%&#x27; IDENTIFIED BY &#x27;root&#x27;; </span><br><span class="line">GRANT ALL PRIVILEGES ON *.* TO &#x27;root&#x27;@&#x27;%&#x27;;</span><br><span class="line"><span class="meta">#</span><span class="bash"> 允许远程连接</span></span><br><span class="line">vim /etc/mysql/mysql.conf.d/mysqld.cnf # 注释bind-address = 127.0.0.1</span><br></pre></td></tr></table></figure>
+<p>主从同步配置</p>
+<ul>
+<li>主节点<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> Master</span></span><br><span class="line">log-bin=mysql-bin # 开启二进制日志</span><br><span class="line">server-id=1 [[设置server-id]]，需要唯一</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 重启MySQL</span></span><br><span class="line">service mysql restart</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 新建同步用户</span></span><br><span class="line">CREATE USER &#x27;MySlave&#x27;@&#x27;192.168.56.112&#x27; IDENTIFIED BY &#x27;root&#x27;;</span><br><span class="line">GRANT REPLICATION SLAVE ON *.* TO &#x27;MySlave&#x27;@&#x27;192.168.56.112&#x27;;</span><br><span class="line">FLUSH PRIVILEGES;</span><br></pre></td></tr></table></figure></li>
+<li>从节点<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> Slave</span></span><br><span class="line">log-bin=mysql-bin # 开启二进制日志</span><br><span class="line">server-id=2 [[设置server-id]]，需要唯一</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 重启MySQL</span></span><br><span class="line">service mysql restart</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 主库ip / 主库用户 / 主库密码 / 主库bin <span class="built_in">log</span> 文件名 / 主库文件偏移量</span></span><br><span class="line">CHANGE MASTER TO</span><br><span class="line">    MASTER_HOST=&#x27;192.168.56.111&#x27;, </span><br><span class="line">    MASTER_USER=&#x27;MySlave&#x27;,</span><br><span class="line">    MASTER_PASSWORD=&#x27;root&#x27;,</span><br><span class="line">    MASTER_LOG_FILE=&#x27;mysql-bin.000001&#x27;,</span><br><span class="line">    MASTER_LOG_POS=771;</span><br><span class="line"></span><br><span class="line">START SLAVE;</span><br><span class="line"></span><br><span class="line">SHOW SLAVE STATUS\G;</span><br></pre></td></tr></table></figure></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/MySQL/" rel="tag"># MySQL</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/12/18/JVM%E6%8B%86%E8%A7%A3/" rel="prev" title="JVM拆解">
+      <i class="fa fa-chevron-left"></i> JVM拆解
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/02/14/New_Year_VLOG/" rel="next" title="2021年春节VLOG">
+      2021年春节VLOG <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B8%B8%E7%94%A8MySQL%E9%AB%98%E5%8F%AF%E7%94%A8%E4%B8%AD%E9%97%B4%E4%BB%B6%E6%96%B9%E6%A1%88"><span class="nav-number">1.</span> <span class="nav-text">常用MySQL高可用中间件方案</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#MySQL-Router"><span class="nav-number">1.1.</span> <span class="nav-text">MySQL Router</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Maxscale"><span class="nav-number">1.2.</span> <span class="nav-text">Maxscale</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ProxySQL"><span class="nav-number">1.3.</span> <span class="nav-text">ProxySQL</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ArkProxy"><span class="nav-number">1.4.</span> <span class="nav-text">ArkProxy</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#MyCat"><span class="nav-number">1.5.</span> <span class="nav-text">MyCat</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Apache-shardingsphere-JDBC"><span class="nav-number">1.6.</span> <span class="nav-text">Apache shardingsphere-JDBC</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Galera-Cluster%E6%9E%B6%E6%9E%84"><span class="nav-number">1.7.</span> <span class="nav-text">Galera Cluster架构</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#MySQL-Group-Replication%E6%9E%B6%E6%9E%84"><span class="nav-number">1.8.</span> <span class="nav-text">MySQL Group Replication架构</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MySQL-%E4%B8%BB%E4%BB%8E%E5%90%8C%E6%AD%A5%E9%85%8D%E7%BD%AE"><span class="nav-number">2.</span> <span class="nav-text">MySQL 主从同步配置</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">LEEZY</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">37</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">LEEZY</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

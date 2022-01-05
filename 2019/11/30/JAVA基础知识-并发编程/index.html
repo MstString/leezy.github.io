@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.leezy.top","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="并发编程的基础、并发模拟工具及代码。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java基础知识-并发编程">
+<meta property="og:url" content="https://www.leezy.top/2019/11/30/JAVA%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86-%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/index.html">
+<meta property="og:site_name" content="SAKURA">
+<meta property="og:description" content="并发编程的基础、并发模拟工具及代码。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2019-11-29T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-11-30T09:45:03.863Z">
+<meta property="article:author" content="LEEZY">
+<meta property="article:tag" content="Java">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://www.leezy.top/2019/11/30/JAVA%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86-%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Java基础知识-并发编程 | SAKURA</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">SAKURA</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://www.leezy.top/2019/11/30/JAVA%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86-%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="LEEZY">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="SAKURA">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Java基础知识-并发编程
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-11-30 00:00:00" itemprop="dateCreated datePublished" datetime="2019-11-30T00:00:00+08:00">2019-11-30</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-11-30 17:45:03" itemprop="dateModified" datetime="2021-11-30T17:45:03+08:00">2021-11-30</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>并发编程的基础、并发模拟工具及代码。</p>
+<span id="more"></span>
+
+<h3 id="并发编程的基础"><a href="#并发编程的基础" class="headerlink" title="并发编程的基础"></a>并发编程的基础</h3><blockquote>
+<p>CPU多级缓存</p>
+</blockquote>
+<p>时间局部性 空间局部性<br>缓存一致性： M E S I 用于保证多个CPU Cache之间共享数据的一致<br>M 修改状态<br>E 独享状态<br>S 共享状态<br>I 无效状态</p>
+<blockquote>
+<p>乱序执行优化</p>
+</blockquote>
+<p>为了提高运算速度而做出违背代码原有顺序的优化</p>
+<blockquote>
+<p>JAVA内存模型 (Java Memory Model - JMM)</p>
+</blockquote>
+<p>Heap 堆<br>可动态分配内存大小，生存期不需事先告诉编译器，存取速度慢，常用于存放对象<br>Thread Stack 栈<br>存取速度快，仅次于寄存器，数据大小和生存期必须确定，常用于存取基本类型变量，本地变量</p>
+<p>栈上的引用变量数据可以访问引用的堆对象，如果两个线程同时调用了同一个对象，都会访问成员变量，但是这两个线程会有自己变量的私有拷贝。</p>
+<p>每个线程都有自己的“本地内存”，Java中线程的“本地内存”指的是CPU寄存器和高速缓存的抽象描述。两个线程之间的变量共享是要通过主内存的。</p>
+<blockquote>
+<p>Java内存模型-同步八种操作</p>
+</blockquote>
+<ul>
+<li><p>lock（锁定）：作用于主内存的变量，把一个变量标识为一条线程独占状态</p>
+</li>
+<li><p>unlock（解锁）：作用于主内存的变量，把一个处于锁定状态的变量释放出来，释放后的变量才可以被其他线程锁定。</p>
+</li>
+<li><p>read（读取）：作用于主内存的变量，把一个变量值从主内存传输到线程的工作内存中以便随后的load动作使用。</p>
+</li>
+<li><p>load（载入）: 作用于工作内存的变量,它把read操作从主内存中得到的变量值放入工作内存的变量副本中</p>
+</li>
+<li><p>use（使用）：作用于工作内存的变量,把工作内存中的一个变量值传递给执行引擎</p>
+</li>
+<li><p>assign（赋值）：作用于工作内存的变量,它把一个从执行引擎接收到的值赋值给工作内存的变量</p>
+</li>
+<li><p>store（存储）：作用于工作内存的变量，把工作内存中的一个变量的值传送到主内存中,以便随后的write的操作</p>
+</li>
+<li><p>write（写入）：作用于主内存的变量,它把store操作从工作内存中一个变量的值传送到主内存的变量中</p>
+</li>
+</ul>
+<p>工作规则：</p>
+<ul>
+<li><p>如果要把一个变量从主内存中复制到工作内存,就需要按顺序地执行read和load操作,如果把变量从工作内存中同步回主内存中,就要按顺序地执行store和write操作。但Java内存模型只要求上述操作必须按顺序执行,而没有保证必须是连续执行。</p>
+</li>
+<li><p>不允许read和load、store和write操作之一单独出现</p>
+</li>
+<li><p>不允许一个线程丢弃它的最近assign的操作,即变量在工作内存中改变了之后必须同步到主内存中</p>
+</li>
+<li><p>不允许—个线程无原因地(没有发生过任何assign操作)把数据从工作内存同步回主内存中</p>
+</li>
+<li><p>一个新的变量只能在主内存中诞生,不允许在工作内存中直接使用一个未被初始化(load或assign )的变量。即就是对一个变量实施use和store操作之前,必须先执行过了assign和load操作</p>
+</li>
+<li><p>一个变量在同_时刻只允许一条线程对其进行lock操作，但lock操作可以被同一条线程重复执行多次,多次执行lock后,只有执行相同次数的unlock操作,变量才会被解锁。lock和unlock必须成对出现</p>
+</li>
+<li><p>如果对一个变量执行lock操作,将会清空工作内存中此变量的值,在执行引擎使用这个变量前需要重新执行load或assign操作初始化变量的值</p>
+</li>
+<li><p>不允许一个线程无原因地（没有发生过任何assign操作）把数据从工作内存同步回主内存中</p>
+</li>
+<li><p>一个新的变量只能在主内存中诞生/不允许在工作内存中直接使用一个未被初始化（load或assign ）的变量。即就是对一个变量实施use和store操作之前, 必须先执行过了assign和load操作</p>
+</li>
+</ul>
+<h3 id="并发模拟工具及代码"><a href="#并发模拟工具及代码" class="headerlink" title="并发模拟工具及代码:"></a>并发模拟工具及代码:</h3><p>工具：</p>
+<blockquote>
+<p>PostMan</p>
+</blockquote>
+<blockquote>
+<p>Apache Bench</p>
+</blockquote>
+<blockquote>
+<p>Apache JMeter</p>
+</blockquote>
+<p>代码：</p>
+<blockquote>
+<p>CountDownLatch - 闭锁：1. await() 2. countDown() 阻塞线程，满足某种特定的条件继续执行，常与与线程池一同使用。</p>
+</blockquote>
+<blockquote>
+<p>Semaphore - 信号量：可以阻塞线程，控制同一时间请求的并发量</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.leezy.concurrency;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.leezy.concurrency.annoations.NotThreadSafe;</span><br><span class="line"><span class="keyword">import</span> lombok.extern.slf4j.Slf4j;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.CountDownLatch;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.ExecutorService;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.Executors;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.Semaphore;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@program</span>: spring-cloud-leezy</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@description</span>: 测试并发</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span>: LEEZY</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@create</span>: 2019-11-30 16:03</span></span><br><span class="line"><span class="comment"> **/</span></span><br><span class="line"></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="meta">@NotThreadSafe</span></span><br><span class="line"><span class="comment">// count:4962 结果不准确，线程不安全</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ConcurrencyTest</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 请求总数</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> clientTotal = <span class="number">5000</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 同时并发执行的线程数</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> threadTotal = <span class="number">200</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> count = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">add</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        count++;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">        <span class="comment">// 线程池</span></span><br><span class="line">        ExecutorService executorService = Executors.newCachedThreadPool();</span><br><span class="line">        <span class="comment">// 信号量以及并发线程数</span></span><br><span class="line">        <span class="keyword">final</span> Semaphore semaphore = <span class="keyword">new</span> Semaphore(threadTotal);</span><br><span class="line">        <span class="comment">// 计数器-闭锁 放入请求总数</span></span><br><span class="line">        <span class="keyword">final</span> CountDownLatch countDownLatch = <span class="keyword">new</span> CountDownLatch(clientTotal);</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; clientTotal; i++) &#123;</span><br><span class="line">            executorService.execute(() -&gt; &#123;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    <span class="comment">// 根据并发的限制数量, 判断当前线程是否允许被执行</span></span><br><span class="line">                    semaphore.acquire();</span><br><span class="line">                    add();</span><br><span class="line">                    <span class="comment">// 释放线程</span></span><br><span class="line">                    semaphore.release();</span><br><span class="line">                &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                    log.error(<span class="string">&quot;exception&quot;</span>, e);</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="comment">// 执行一次就进行releaseShared</span></span><br><span class="line">                countDownLatch.countDown();</span><br><span class="line">            &#125;);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 这个方法可以保证 countDown 减为0</span></span><br><span class="line">        countDownLatch.await();</span><br><span class="line">        <span class="comment">// 关闭线程池</span></span><br><span class="line">        executorService.shutdown();</span><br><span class="line">        log.info(<span class="string">&quot;count:&quot;</span> + count);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="线程安全性"><a href="#线程安全性" class="headerlink" title="线程安全性"></a>线程安全性</h3><blockquote>
+<p>原子性：提供了互斥访问，同一时刻只能有一个线程来对它进行操作。 - Atomic包</p>
+</blockquote>
+<h3 id="ThreadLocal的使用"><a href="#ThreadLocal的使用" class="headerlink" title="ThreadLocal的使用"></a>ThreadLocal的使用</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.ArrayList;</span><br><span class="line"><span class="keyword">import</span> java.util.List;</span><br><span class="line"><span class="keyword">import</span> java.util.logging.Logger;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ThreadLocalTest</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> Logger logger = Logger.getLogger(<span class="string">&quot;logger&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> ThreadLocal&lt;String&gt; mThreadLocal = <span class="keyword">new</span> ThreadLocal&lt;&gt;();</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">testThreadLocal</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">        mThreadLocal.set(<span class="string">&quot;main-thread&quot;</span>);</span><br><span class="line">        logger.info(<span class="string">&quot;result1: &quot;</span> + mThreadLocal.get());</span><br><span class="line">        Thread thread1 = <span class="keyword">new</span> Thread() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                <span class="keyword">super</span>.run();</span><br><span class="line">                <span class="comment">// thread1内部设置的值只有thead1内部可以得到，所以result3为空</span></span><br><span class="line">                mThreadLocal.set(<span class="string">&quot;thread_one&quot;</span>);</span><br><span class="line">                logger.info(<span class="string">&quot;result2: &quot;</span> + mThreadLocal.get());</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;;</span><br><span class="line">        thread1.start();</span><br><span class="line">        thread1.join();</span><br><span class="line">        Thread thread2 = <span class="keyword">new</span> Thread() &#123;</span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                <span class="keyword">super</span>.run();</span><br><span class="line">                logger.info(<span class="string">&quot;result3: &quot;</span> + mThreadLocal.get());</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;;</span><br><span class="line">        thread2.start();</span><br><span class="line">        thread2.join();</span><br><span class="line">        logger.info(<span class="string">&quot;result4: &quot;</span> + mThreadLocal.get());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        ThreadLocalTest threadLocalTest = <span class="keyword">new</span> ThreadLocalTest();</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            threadLocalTest.testThreadLocal();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            System.out.println(e.getMessage());</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>输出：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 十二月 15, 2019 4:36:21 下午 ThreadLocalTest testThreadLocal</span></span><br><span class="line">信息: result1: main-thread</span><br><span class="line"><span class="meta">#</span><span class="bash"> 十二月 15, 2019 4:36:21 下午 ThreadLocalTest<span class="variable">$1</span> run</span></span><br><span class="line">信息: result2: thread_one</span><br><span class="line"><span class="meta">#</span><span class="bash"> 十二月 15, 2019 4:36:21 下午 ThreadLocalTest<span class="variable">$2</span> run</span></span><br><span class="line">信息: result3: null</span><br><span class="line"><span class="meta">#</span><span class="bash"> 十二月 15, 2019 4:36:21 下午 ThreadLocalTest testThreadLocal</span></span><br><span class="line">信息: result4: main-thread</span><br></pre></td></tr></table></figure>
+
+<h3 id="ThreadLocal详解"><a href="#ThreadLocal详解" class="headerlink" title="ThreadLocal详解"></a>ThreadLocal详解</h3><p>四个接口：</p>
+<ul>
+<li><p>public void set(T value) { }<br>设置当前线程的ThreadLocal值为指定的Value</p>
+</li>
+<li><p>public T get() { }<br>获取当前线程所对应的ThreadLocal值，如果当前线程下没有值，就调用initialValue函数对其进行初始化</p>
+</li>
+<li><p>public void remove() { }<br>删除当前线程ThreadLocal对应的值，当前线程结束时，系统会自动回收线程局部变量值。P.S. remove方法调用后再调用get方法会使<br>initialValue()重新被调用，从而使ThreadLocal的值被重新被初始化。</p>
+</li>
+<li><p>protected T initilValue() { }<br>当前线程通过get()方法第一次对ThreadLocal进行访问时，会调用该方法。</p>
+</li>
+</ul>
+<p>如果我们希望ThreadLocal拥有一个不为null的初始值，则应该为ThreadLocal定义一个子类，并重写initialValue()方法。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Java/" rel="tag"># Java</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2019/11/07/JAVA8%E5%B8%B8%E7%94%A8%E7%9A%84%E6%97%A5%E6%9C%9F%E6%97%B6%E9%97%B4%E6%96%B9%E6%B3%95/" rel="prev" title="JAVA8 常用的日期时间方法">
+      <i class="fa fa-chevron-left"></i> JAVA8 常用的日期时间方法
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/01/11/Docker%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/" rel="next" title="Docker常用命令">
+      Docker常用命令 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%9A%84%E5%9F%BA%E7%A1%80"><span class="nav-number">1.</span> <span class="nav-text">并发编程的基础</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B9%B6%E5%8F%91%E6%A8%A1%E6%8B%9F%E5%B7%A5%E5%85%B7%E5%8F%8A%E4%BB%A3%E7%A0%81"><span class="nav-number">2.</span> <span class="nav-text">并发模拟工具及代码:</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E6%80%A7"><span class="nav-number">3.</span> <span class="nav-text">线程安全性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ThreadLocal%E7%9A%84%E4%BD%BF%E7%94%A8"><span class="nav-number">4.</span> <span class="nav-text">ThreadLocal的使用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ThreadLocal%E8%AF%A6%E8%A7%A3"><span class="nav-number">5.</span> <span class="nav-text">ThreadLocal详解</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">LEEZY</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">37</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">LEEZY</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

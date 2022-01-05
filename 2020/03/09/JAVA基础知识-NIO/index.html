@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.leezy.top","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="Java中IO模型。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JAVA基础知识-NIO">
+<meta property="og:url" content="https://www.leezy.top/2020/03/09/JAVA%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86-NIO/index.html">
+<meta property="og:site_name" content="SAKURA">
+<meta property="og:description" content="Java中IO模型。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-03-09T03:06:00.000Z">
+<meta property="article:modified_time" content="2021-11-30T09:45:03.863Z">
+<meta property="article:author" content="LEEZY">
+<meta property="article:tag" content="Java">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://www.leezy.top/2020/03/09/JAVA%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86-NIO/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>JAVA基础知识-NIO | SAKURA</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">SAKURA</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://www.leezy.top/2020/03/09/JAVA%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86-NIO/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="LEEZY">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="SAKURA">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          JAVA基础知识-NIO
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-03-09 11:06:00" itemprop="dateCreated datePublished" datetime="2020-03-09T11:06:00+08:00">2020-03-09</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-11-30 17:45:03" itemprop="dateModified" datetime="2021-11-30T17:45:03+08:00">2021-11-30</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>Java中IO模型。</p>
+<span id="more"></span>
+<h2 id="常用的四种IO模型"><a href="#常用的四种IO模型" class="headerlink" title="常用的四种IO模型"></a>常用的四种IO模型</h2><h3 id="同步阻塞IO"><a href="#同步阻塞IO" class="headerlink" title="同步阻塞IO"></a>同步阻塞IO</h3><p>在Java应用程序进程中，默认情况下，所有的socket连接的IO操作都是同步阻塞IO(BlockingIO);在阻塞式IO模型中，Java应用程序从IO系统调用开始，直到系统调用返回，在这段时间内，Java进程是阻塞的。返回成功后，应用进程开始处理用户空间的缓存区数据。<br>在Java中发起一个socket的read读操作的系统调用，流程大致如下：</p>
+<ol>
+<li> 从Java启动IO读read系统调用开始，用户线程就进入阻塞状态。</li>
+<li> 当系统内核收到read系统调用，就开始准备数据。一开始，数据可能还没开始到达内核缓冲区（例如，还没有收到一个完整的socket数据包），这个时候内核就要等待。</li>
+<li> 内核一直等到完整的数据到达，就会将数据从内核缓冲区中复制到用户缓冲区（用户空间的内存），然后内核返回结果（例如返回复制到用户缓冲区中的字节数）。</li>
+<li> 直到内核返回后，用户线程才会接触阻塞的状态，重新运行起来。<br>总之，阻塞IO的特点是：在内核进行IO执行的两个阶段，用户线程都被阻塞了。</li>
+</ol>
+<h3 id="同步非阻塞NIO"><a href="#同步非阻塞NIO" class="headerlink" title="同步非阻塞NIO"></a>同步非阻塞NIO</h3><p>socket连接默认是阻塞模式，在Linux系统下，可以通过设置将socket变成为非阻塞的模式（Non-Blocking）。使用非阻塞模式的IO读写，叫作同步非阻塞IO（None Blocking IO），简称为NIO模式。在NIO模型中，应用程序一旦开始IO系统调用，会出现以下两种情况：</p>
+<ol>
+<li> 在内核数据没有准备好的阶段，用户线程发起IO请求时，立即返回。所以，为了读取到最终的数据，用户线程需要不断地发起IO系统调用。</li>
+<li> 在内核缓冲区中有数据的情况下，是阻塞的，直到数据从内核缓冲复制到用户进程缓冲。复制完成后，系统调用返回成功，应用进程开始处理用户空间的缓存数据。</li>
+</ol>
+<p>举个例子。发起一个非阻塞socket的read读操作的系统调用，流程如下：</p>
+<ol>
+<li>在内核数据没有准备好的阶段，用户线程发起IO请求时，立即返回。所以，为了读取到最终的数据，用户线程需要不断地发起IO系统调用。</li>
+<li>内核数据到达后，用户线程发起系统调用，用户线程阻塞。内核开始复制数据，它会将数据从内核缓冲区复制到用户缓冲区（用户空间的内存），然后内核返回结果（例如返回复制到的用户缓冲区的字节数）。</li>
+<li>用户线程读到数据后，才会解除阻塞状态，重新运行起来。也就是说，用户进程需要经过多次的尝试，才能保证最终真正读到数据，而后继续执行。同步非阻塞IO的特点：应用程序的线程需要不断地进行IO系统调用，轮询数据是否已经准备好，如果没有准备好，就继续轮询，直到完成IO系统调用为止。同步非阻塞IO的优点：每次发起的IO系统调用，在内核等待数据过程中可以立即返回。用户线程不会阻塞，实时性较好。同步非阻塞IO的缺点：不断地轮询内核，这将占用大量的CPU时间，效率低下。</li>
+</ol>
+<h3 id="IO多路复用模型"><a href="#IO多路复用模型" class="headerlink" title="IO多路复用模型"></a>IO多路复用模型</h3><p>举个例子来说明IO多路复用模型的流程。发起一个多路复用IO的read读操作的系统调用，流程如下：</p>
+<ol>
+<li> 选择器注册。在这种模式中，首先，将需要read操作的目标socket网络连接，提前注册到select/epoll选择器中，Java中对应的选择器类是Selector类。然后，才可以开启整个IO多路复用模型的轮询流程。</li>
+<li> 就绪状态的轮询。通过选择器的查询方法，查询注册过的所有socket连接的就绪状态。通过查询的系统调用，内核会返回一个就绪的socket列表。当任何一个注册过的socket中的数据准备好了，内核缓冲区有数据（就绪）了，内核就将该socket加入到就绪的列表中。当用户进程调用了select查询方法，那么整个线程会被阻塞掉。</li>
+<li> 用户线程获得了就绪状态的列表后，根据其中的socket连接，发起read系统调用，用户线程阻塞。内核开始复制数据，将数据从内核缓冲区复制到用户缓冲区。</li>
+<li>复制完成后，内核返回结果，用户线程才会解除阻塞的状态，用户线程读取到了数据，继续执行。</li>
+</ol>
+<p>IO多路复用模型的优点：与一个线程维护一个连接的阻塞IO模式相比，使用select/epoll的最大优势在于，一个选择器查询线程可以同时处理成千上万个连接（Connection）。系统不必创建大量的线程，也不必维护这些线程，从而大大减小了系统的开销。Java语言的NIO（New IO）技术，使用的就是IO多路复用模型。在Linux系统上，使用的是epoll系统调用。</p>
+<p>IO多路复用模型的缺点：本质上，select/epoll系统调用是阻塞式的，属于同步IO。都需要在读写事件就绪后，由系统调用本身负责进行读写，也就是说这个读写过程是阻塞的。</p>
+<h3 id="异步IO模型-AIO-Asynchronous-IO"><a href="#异步IO模型-AIO-Asynchronous-IO" class="headerlink" title="异步IO模型 - AIO (Asynchronous IO)"></a>异步IO模型 - AIO (Asynchronous IO)</h3><p>在异步IO模型中，在整个内核的数据处理过程中，包括内核将数据从网络物理设备（网卡）读取到内核缓冲区、将内核缓冲区的数据复制到用户缓冲区，用户程序都不需要阻塞。<br>发起一个异步IO的read读操作的系统调用，流程如下：</p>
+<ol>
+<li>当用户线程发起了read系统调用，立刻就可以开始去做其他事情，用户线程不阻塞。</li>
+<li>内核就开始了IO的第一个阶段：准备数据。等到数据准备好了，内核就会将数据从内核缓冲区复制到用户缓冲区（用户空间的内存）。</li>
+<li>内核会给用户线程发送一个信号（Signal），或者回调用户线程注册的回调接口，告诉用户线程read操作完成了。</li>
+<li>用户线程读取用户缓冲区的数据，完成后续的业务操作。</li>
+</ol>
+<p>异步IO模型的特点：在内核等待数据和复制数据的两个阶段，用户线程都不是阻塞的。用户线程需要接收内核的IO操作完成的事件，或者用户线程需要注册一个IO操作完成的回调函数。正因为如此，异步IO有的时候也被称为信号驱动IO。</p>
+<p>异步IO异步模型的缺点：应用程序仅需要进行事件的注册与接收，其余的工作都留给了操作系统，也就是说，需要底层内核提供支持。</p>
+<h2 id="JAVA-NIO-模型"><a href="#JAVA-NIO-模型" class="headerlink" title="JAVA NIO 模型"></a>JAVA NIO 模型</h2><p>Java NIO由以下三个核心组件组成：</p>
+<ol>
+<li>Channel (通道)</li>
+<li>Buffer (缓冲区)</li>
+<li>Selector (选择器)</li>
+</ol>
+<p>从Java 1.4版本之后，Java的IO类库从阻塞IO升级为了非阻塞IO，即-JAVA NIO(New IO)，底层使用的是IO多路复用模型。</p>
+<p>NIO与OIO的区别，主要体现在三个方面：</p>
+<ol>
+<li>OIO是面向流的，NIO是面向缓冲区的。</li>
+</ol>
+<p>OIO操作中，我们以流式的方式顺序地从一个流（stream）中读取字节，不能随意改变读取指针的位置。在NIO中，引入了Channel和Buffer的概念，读取和写入只需要从通道中读取数据到缓冲区，或将数据从缓冲区中写入到通道中。</p>
+<ol start="2">
+<li>OIO的操作是阻塞的，而NIO的操作是非阻塞的。</li>
+</ol>
+<p>OIO的阻塞体现在调用一个read方法读取一个文件内容，那么调用read的线程会被阻塞，直到read操作完成。</p>
+<ol start="3">
+<li>OIO没有选择器，而NIO是有选择器的概念的。</li>
+</ol>
+<p>NIO的实现，是基于底层的选择器的系统调用。NIO的选择器，需要底层操作系统提供支持, 而OIO不需要用到选择器。</p>
+<h3 id="NIO-Buffer类"><a href="#NIO-Buffer类" class="headerlink" title="NIO Buffer类"></a>NIO Buffer类</h3><p>Buffer类是一个非线程安全的类，Buffer类是一个抽象类，对应于Java的主要数据类型，在NIO中有8种缓冲区类，分别如下：ByteBuffer、CharBuffer、DoubleBuffer、FloatBuffer、IntBuffer、LongBuffer、ShortBuffer、MappedByteBuffer。前7种Buffer类型，覆盖了能在IO中传输的所有的Java基本数据类型。第8种类型MappedByteBuffer是专门用于内存映射的一种ByteBuffer类型。<br>Buffer类的属性：</p>
+<ul>
+<li><p>capacity （容量）： capacity容量指的是写入的数据对象的数量；</p>
+</li>
+<li><p>positiohn （读写位置）： 缓冲区中喜爱一个要被读或者写的元素的索引；</p>
+</li>
+<li><p>limit （上限）： 缓冲区当前的数据量；</p>
+</li>
+<li><p>mark （标记）：调用mark()方法设置mark=position，再调用reset()可以让position恢复到mark标记的位置即postion=mark; </p>
+</li>
+</ul>
+<h3 id="NIO-Buffer的操作方法"><a href="#NIO-Buffer的操作方法" class="headerlink" title="NIO Buffer的操作方法"></a>NIO Buffer的操作方法</h3><ul>
+<li><code>allocate()</code> 创建缓冲区</li>
+<li><code>put()</code> 写入到缓冲区；要写入缓冲区，需要调用put方法。put方法很简单，只有一个参数，即为所需要写入的对象。不过，写入的数据类型要求与缓冲区的类型保持一致。</li>
+<li><code>flip()</code> 读写模式反转；调用flip方法后，之前写入模式的position的值会变成可读上限的值，新的读取模式下的position，会变成0，表示从头开始读取。清除之前的mark标记，因为mark保存的是写模式下的临时位置</li>
+<li><code>get()</code> 从缓冲区读取；读取操作会改变可读位置position的值，而limit值不会改变。如果position值和limit的值相等，表示所有数据读取完成，position指向了一个没有数据的元素位置，已经不能再读了。此时再读，会抛出BufferUnderflowException异常。</li>
+<li><code>rewind()</code> 数据倒带；已经读完的数据，如果需要再读一遍，可以调用rewind()方法。rewind调整了缓冲区position属性，position重置为0，可以重读缓冲区中所有的数据，limit保持不变，数据量还是一样的，仍然表示能从缓冲区中读取多少个元素。</li>
+<li><code>mark()</code>和<code>reset()</code> mark()将当前的position的值保存起来，放到mark属性中，reset()方法将mark的值恢复到position中。</li>
+<li><code>clear()</code> 清空缓冲区；在读取模式下，调用clear方法将缓冲区切换为写入模式，此方法会将position清零，limit设置为capacity最大容量值，可以一直写入，直到缓冲区写满。</li>
+</ul>
+<h3 id="NIO-Channel类"><a href="#NIO-Channel类" class="headerlink" title="NIO Channel类"></a>NIO Channel类</h3><p>最为重要的四种Channel（通道）实现：FileChannel、SocketChannel、ServerSocketChannel、DatagramChannel。</p>
+<h3 id="FileChannel文件通道"><a href="#FileChannel文件通道" class="headerlink" title="FileChannel文件通道"></a>FileChannel文件通道</h3><ul>
+<li>获取FileChannel文件通道<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 创建文件输入流</span></span><br><span class="line">FileInputStream fileInputStream = <span class="keyword">new</span> FileInputStream(<span class="string">&quot;filePath&quot;</span>);</span><br><span class="line"><span class="comment">// 获取文件流的通道</span></span><br><span class="line">FileChannel inChannel = fileInputStream.getChannel();</span><br><span class="line"></span><br><span class="line"><span class="comment">// 创建文件输出流</span></span><br><span class="line">FileOutputStream fileOutputStream = <span class="keyword">new</span> FileOutputStream(<span class="string">&quot;filePath&quot;</span>);</span><br><span class="line"><span class="comment">// 获取文件流通道</span></span><br><span class="line">FileChannel outChannel = fileOutputStream.getChannel();</span><br></pre></td></tr></table></figure></li>
+<li>读取FileChannel通道</li>
+</ul>
+<p>在大部分应用场景从通道读取数据都会调用通道的int read（ByteBufferbuf）方法，它从通道读取到数据写入到ByteBuffer缓冲区，并且返回读取到的数据量。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 获取一个字节缓冲区 注意，新建的ByteBuffer默认是写入模式。在读取数据时需要调用flip或者clear方法切换</span></span><br><span class="line">ByteBuffer byteBuffer = ByteBuffer.allocate(<span class="number">20</span>);</span><br><span class="line"><span class="comment">// 调用通道的read方法，读取数据并传入字节类型的缓冲区</span></span><br><span class="line"><span class="keyword">int</span> length = inChannel.read(byteBuffer);</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>写入FileChannel通道</li>
+</ul>
+<p>写入数据到通道，在大部分应用场景，都会调用通道的int write（ByteBufferbuf）方法。此方法的参数——ByteBuffer缓冲区，是数据的来源。write方法的作用，是从ByteBuffer缓冲区中读取数据，然后写入到通道自身，而返回值是写入成功的字节数。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">byteBuffer.flip();</span><br><span class="line"><span class="keyword">int</span> length = outChannel.write(byteBuffer);</span><br></pre></td></tr></table></figure>
+<ul>
+<li>关闭通道</li>
+</ul>
+<p>当通道使用完成后，必须将其关闭。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">channel.close();</span><br></pre></td></tr></table></figure>
+<ul>
+<li>强制刷新到磁盘</li>
+</ul>
+<p>由于性能原因，要保证写入的通道的缓存数据最终都写入磁盘，要调用FileChannel的force()方法。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">channel.force(<span class="keyword">true</span>);</span><br></pre></td></tr></table></figure>
+
+<h3 id="SocketChannel套接字通道-ServerSocketChannel"><a href="#SocketChannel套接字通道-ServerSocketChannel" class="headerlink" title="SocketChannel套接字通道/ServerSocketChannel"></a>SocketChannel套接字通道/ServerSocketChannel</h3><p>在NIO中，涉及网络连接的通道有两个，一个是SocketChannel负责连接传输，一个ServerSocketChannel负责连接监听。<br>NIO的SocketChannel对应OIO的Socket类， 一般同时位于服务器端和客户端。对应于一个连接，两端都有一个负责传输的SocketChannel。<br>NIO的ServerSocket对应OIO的ServerSocket类，一般位于服务器端。<br>无论是SocketChannel还是ServerSocketChannel都支持阻塞和非阻塞两种模式，调用configureBlocking方法。socketChannel.configureBlocking(false)设置为非阻塞模式，socketChannel.configureBlocking(true)设置为阻塞模式。</p>
+<ul>
+<li>获取SocketChannel传输通道<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* 客户端 */</span></span><br><span class="line"><span class="comment">// 获得一个套接字传输通道</span></span><br><span class="line">SocketChannel socketChannel = SocketChannel.open();</span><br><span class="line"><span class="comment">// 设置为非阻塞模式</span></span><br><span class="line">socketChannel.configureBlocking(<span class="keyword">false</span>);</span><br><span class="line"><span class="comment">// 对服务器的IP和端口发起连接</span></span><br><span class="line">socketChannel.connect(<span class="keyword">new</span> InetSocketAddress(<span class="string">&quot;127.0.0.1&quot;</span>, <span class="number">80</span>));</span><br><span class="line">```java</span><br><span class="line">非阻塞情况下，与服务器的连接可能还没有真正建立，socketChannel.connect方法就返回了，因此需要不断地自旋，检查当前是否是连接到了主机：</span><br><span class="line">```<span class="function">java</span></span><br><span class="line"><span class="function"><span class="title">while</span><span class="params">(!socketChannel.finishConnect()</span>) </span>&#123;</span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* 服务器端 */</span></span><br><span class="line"><span class="comment">// 通过事件，获取服务器监听通道</span></span><br><span class="line">ServerSocketChannel serverSocketChannel = (ServerSocketChannel) key.channel();</span><br><span class="line"><span class="comment">// 获取新连接的套接字通道</span></span><br><span class="line">SocketChannel socketChannel = serverSocketChannel.accept();</span><br><span class="line"><span class="comment">// 设置为非阻塞模式</span></span><br><span class="line">socketChannel.configureBlocking(<span class="keyword">false</span>);</span><br></pre></td></tr></table></figure></li>
+<li>读取SocketChannel传输通道<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 获取一个字节缓冲区 - 写入模式</span></span><br><span class="line">ByteBuffer byteBuffer = ByteBuffer.allocate(<span class="number">20</span>);</span><br><span class="line"><span class="comment">// 如果返回-1，表示读取到了对方的输出结束标志</span></span><br><span class="line"><span class="keyword">int</span> read_length = socketChannel.read(byteBuffer);</span><br></pre></td></tr></table></figure></li>
+<li>写入到SocketChannel传输通道<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 默认的写入模式切换为读取模式</span></span><br><span class="line">byteBuffer.flip();</span><br><span class="line">socketChannel.write(buffer);</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="关闭SocketChannel传输通道"><a href="#关闭SocketChannel传输通道" class="headerlink" title="关闭SocketChannel传输通道"></a>关闭SocketChannel传输通道</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 终止输出方法，向对方发送一个输出的结束标志</span></span><br><span class="line">socketChannel.shutdownOutput();</span><br><span class="line"><span class="comment">// 关闭套接字连接</span></span><br><span class="line">IOUtil.closeQuietly(socketChannel);</span><br></pre></td></tr></table></figure>
+
+<h3 id="DatagramChannel数据报通道"><a href="#DatagramChannel数据报通道" class="headerlink" title="DatagramChannel数据报通道"></a>DatagramChannel数据报通道</h3><p>DatagramChannel是采用UDP进行传输的面向非连接的协议，只要直到服务器的IP和端口，就可以直接向对方发送数据。</p>
+<ul>
+<li>获取DatagramChannel数据报通道</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 获取通道</span></span><br><span class="line">DatagramChannel datagramChannel = DatagramChannel.open();</span><br><span class="line"><span class="comment">// 设置为非阻塞模式</span></span><br><span class="line">datagramChannel.configureBlocking(<span class="keyword">false</span>);</span><br><span class="line">datagramChannel.bind(<span class="keyword">new</span> InetSocketAddress(<span class="number">18080</span>));</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>读取DatagramChannel数据报通道数据</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ByteBuffer byteBuffer = ByteBuffer.allocate(<span class="number">1024</span>);</span><br><span class="line">SocketAddress address = datagramChannel.receive(byteBuffer);</span><br></pre></td></tr></table></figure></li>
+<li><p>写入DatagramChannel数据通道</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 把缓冲区切换到读取模式</span></span><br><span class="line">byteBuffer.flip()</span><br><span class="line"><span class="comment">// 调用send方法，把数据发送到目标IP和端口</span></span><br><span class="line">datagramChannel.send(byteBuffer, <span class="keyword">new</span> InetSocketAddress(NIODemoConfig.SOCKET_SERVER_IP, NIODemoConfig.SOCKET+SERVER_PORT));</span><br><span class="line"><span class="comment">// 清空缓冲区，切换到写入模式</span></span><br><span class="line">byteBuffer,clear();</span><br></pre></td></tr></table></figure></li>
+<li><p>关闭DatagramChannel数据报通道</p>
+</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">datagramChannel.close();</span><br></pre></td></tr></table></figure>
+
+<h3 id="NIO-Selector-选择器"><a href="#NIO-Selector-选择器" class="headerlink" title="NIO Selector 选择器"></a>NIO Selector 选择器</h3><p>选择器的作用是完成IO的多路复用，一个通道代表一个连接通路，通过选择器可以同时监控多个通道的IO状况，选择器和通道的关系，是监控和被监控的关系。<br>通道和选择器之间的关系，通过<code>register（注册</code>）的方式完成。调用通道的<code>Channel.register(Selector selector, int ops)</code>方法，可以将通道实例注册到一个选择器中。</p>
+<ul>
+<li>Selector selector: 指定通道注册到的选择器实例；</li>
+<li>int operation 指定选择器要监控的IO事件类型。可供选择器监控的通道IO事件类型，包括以下四种：</li>
+</ul>
+<ol>
+<li>可读就绪：SelectionKey.OP_READ</li>
+<li>可写就绪：SelectionKey.OP_WRITE</li>
+<li>连接就绪：SelectionKey.OP_CONNECT</li>
+<li>接收就绪：SelectionKey.OP_ACCEPT</li>
+</ol>
+<p>除了FileChannel文件通道外，其他选择器都是可选择的。这是因为其他三个通道都继承了一个SelectableChannel这个抽象类。</p>
+<ul>
+<li>SelectionKey选择键: 指的是被选择器选中的IO事件；一个IO事件发生（就绪状态达成）后，如果之前在选择器中注册过，就会被选择器选中，并放入SelectionKey选择键集合；如果之前没有注册过，即使发生了IO事件，也不会被选择器选中。</li>
+</ul>
+<p>选择器使用流程： </p>
+<ul>
+<li>获取选择器实例<br>Selector选择器的类方法open()的内部，是向选择器SPI（SelectorProvider）发出请求，通过默认的SelectorProvider（选择器提供者）对象，获取一个新的选择器实例。<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 调用静态工厂方法open()来获取</span></span><br><span class="line">Selector selector = Selector.open();</span><br></pre></td></tr></table></figure></li>
+<li>将通道注册到选择器中<br>其次，还需要注意：一个通道，并不一定要支持所有的四种IO事件。例如服务器监听通道ServerSocketChannel，仅仅支持Accept（接收到新连接）IO事件；而SocketChannel传输通道，则不支持Accept（接收到新连接）IO事件。如何判断通道支持哪些事件呢？可以在注册之前，可以通过通道的<code>validOps()</code>方法，来获取该通道所有支持的IO事件集合。<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 获取通道</span></span><br><span class="line">ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();</span><br><span class="line"><span class="comment">// 设置为非阻塞</span></span><br><span class="line">serverSocketChannel.configureBlocking(<span class="keyword">false</span>);</span><br><span class="line"><span class="comment">// 绑定连接</span></span><br><span class="line">serverSocketChannel.bind(<span class="keyword">new</span> InetSocketAddress(SystemConfig.SOCKET_SERVER_PORT));</span><br><span class="line"><span class="comment">// 将通道注册到选择器上，并制定监听事件为接收就绪事件</span></span><br><span class="line">serverSocketChannel.register(Selector, SelectionKey.OP_ACCEPT);</span><br></pre></td></tr></table></figure></li>
+<li>轮询感兴趣的IO就绪事件<br>通过Selector选择器的select()方法，选出已经注册的、已经就绪的IO事件，保存到SelectionKey选择键集合中, 该方法返回int类型的<code>IO事件通道数量</code>；SelectionKey集合保存在选择器实例内部，是一个元素为SelectionKey类型的集合（Set）。调用选择器的selectedKeys()方法，可以取得选择键集合。<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 轮询，选择IO就绪事件 有多个重载的实现方法</span></span><br><span class="line"><span class="keyword">while</span> (selector.select() &gt; <span class="number">0</span>) &#123;</span><br><span class="line">    Set selectKeys = selector.selectedKeys();</span><br><span class="line">    Iterator keyIterator = selectedKeys.iterator();</span><br><span class="line">    <span class="keyword">while</span>(keyIterator.hasNext()) &#123;</span><br><span class="line">        SelectionKey key = keyIterator.next();</span><br><span class="line">        <span class="comment">// 根据具体IO事件类型，执行对应的业务逻辑</span></span><br><span class="line">        <span class="keyword">if</span>(key.isAcceptable()) &#123;</span><br><span class="line">            <span class="comment">// IO事件：ServerSocketChannel服务器监听通道有新连接</span></span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (key.isConnectable()) &#123;</span><br><span class="line">            <span class="comment">// IO事件：传输通道连接成功</span></span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (key.isReadable()) &#123;</span><br><span class="line">            <span class="comment">// IO事件：传输通道可读</span></span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (key.isWritable()) &#123;</span><br><span class="line">            <span class="comment">// IO事件：传输通道可写</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//处理完成后，移除选择键</span></span><br><span class="line">        keyIterator.remove();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Java/" rel="tag"># Java</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/02/07/Kafka%E5%AD%A6%E4%B9%A0%E6%8C%87%E5%8D%97/" rel="prev" title="Kafka学习指南">
+      <i class="fa fa-chevron-left"></i> Kafka学习指南
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/03/15/JAVA%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86-Reactor%E5%8F%8D%E5%BA%94%E5%99%A8%E6%A8%A1%E5%BC%8F/" rel="next" title="JAVA基础知识-Reactor反应器模式">
+      JAVA基础知识-Reactor反应器模式 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B8%B8%E7%94%A8%E7%9A%84%E5%9B%9B%E7%A7%8DIO%E6%A8%A1%E5%9E%8B"><span class="nav-number">1.</span> <span class="nav-text">常用的四种IO模型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%8C%E6%AD%A5%E9%98%BB%E5%A1%9EIO"><span class="nav-number">1.1.</span> <span class="nav-text">同步阻塞IO</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%8C%E6%AD%A5%E9%9D%9E%E9%98%BB%E5%A1%9ENIO"><span class="nav-number">1.2.</span> <span class="nav-text">同步非阻塞NIO</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#IO%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8%E6%A8%A1%E5%9E%8B"><span class="nav-number">1.3.</span> <span class="nav-text">IO多路复用模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BC%82%E6%AD%A5IO%E6%A8%A1%E5%9E%8B-AIO-Asynchronous-IO"><span class="nav-number">1.4.</span> <span class="nav-text">异步IO模型 - AIO (Asynchronous IO)</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#JAVA-NIO-%E6%A8%A1%E5%9E%8B"><span class="nav-number">2.</span> <span class="nav-text">JAVA NIO 模型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#NIO-Buffer%E7%B1%BB"><span class="nav-number">2.1.</span> <span class="nav-text">NIO Buffer类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#NIO-Buffer%E7%9A%84%E6%93%8D%E4%BD%9C%E6%96%B9%E6%B3%95"><span class="nav-number">2.2.</span> <span class="nav-text">NIO Buffer的操作方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#NIO-Channel%E7%B1%BB"><span class="nav-number">2.3.</span> <span class="nav-text">NIO Channel类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#FileChannel%E6%96%87%E4%BB%B6%E9%80%9A%E9%81%93"><span class="nav-number">2.4.</span> <span class="nav-text">FileChannel文件通道</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SocketChannel%E5%A5%97%E6%8E%A5%E5%AD%97%E9%80%9A%E9%81%93-ServerSocketChannel"><span class="nav-number">2.5.</span> <span class="nav-text">SocketChannel套接字通道&#x2F;ServerSocketChannel</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B3%E9%97%ADSocketChannel%E4%BC%A0%E8%BE%93%E9%80%9A%E9%81%93"><span class="nav-number">2.6.</span> <span class="nav-text">关闭SocketChannel传输通道</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DatagramChannel%E6%95%B0%E6%8D%AE%E6%8A%A5%E9%80%9A%E9%81%93"><span class="nav-number">2.7.</span> <span class="nav-text">DatagramChannel数据报通道</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#NIO-Selector-%E9%80%89%E6%8B%A9%E5%99%A8"><span class="nav-number">2.8.</span> <span class="nav-text">NIO Selector 选择器</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">LEEZY</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">37</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">LEEZY</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

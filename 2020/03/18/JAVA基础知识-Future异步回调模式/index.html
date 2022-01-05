@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.leezy.top","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="异步回调模式。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JAVA基础知识-异步回调模式">
+<meta property="og:url" content="https://www.leezy.top/2020/03/18/JAVA%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86-Future%E5%BC%82%E6%AD%A5%E5%9B%9E%E8%B0%83%E6%A8%A1%E5%BC%8F/index.html">
+<meta property="og:site_name" content="SAKURA">
+<meta property="og:description" content="异步回调模式。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://www.leezy.top/assets/blogImg/Future%E5%BC%82%E6%AD%A5%E5%9B%9E%E8%B0%83%E6%A8%A1%E5%BC%8F_%E6%B3%A1%E8%8C%B6%E6%A1%88%E4%BE%8B.png">
+<meta property="article:published_time" content="2020-03-18T03:06:00.000Z">
+<meta property="article:modified_time" content="2021-11-30T09:45:03.862Z">
+<meta property="article:author" content="LEEZY">
+<meta property="article:tag" content="Java">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://www.leezy.top/assets/blogImg/Future%E5%BC%82%E6%AD%A5%E5%9B%9E%E8%B0%83%E6%A8%A1%E5%BC%8F_%E6%B3%A1%E8%8C%B6%E6%A1%88%E4%BE%8B.png">
+
+<link rel="canonical" href="https://www.leezy.top/2020/03/18/JAVA%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86-Future%E5%BC%82%E6%AD%A5%E5%9B%9E%E8%B0%83%E6%A8%A1%E5%BC%8F/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>JAVA基础知识-异步回调模式 | SAKURA</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">SAKURA</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://www.leezy.top/2020/03/18/JAVA%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86-Future%E5%BC%82%E6%AD%A5%E5%9B%9E%E8%B0%83%E6%A8%A1%E5%BC%8F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="LEEZY">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="SAKURA">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          JAVA基础知识-异步回调模式
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-03-18 11:06:00" itemprop="dateCreated datePublished" datetime="2020-03-18T11:06:00+08:00">2020-03-18</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-11-30 17:45:03" itemprop="dateModified" datetime="2021-11-30T17:45:03+08:00">2021-11-30</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>异步回调模式。</p>
+<span id="more"></span>
+
+<h3 id="JOIN异步阻塞"><a href="#JOIN异步阻塞" class="headerlink" title="JOIN异步阻塞"></a>JOIN异步阻塞</h3><p>操作原理：阻塞当前的线程，直到准备合并的目标线程的执行完成；即线程A调用了线程B的join方法，合并线程B，线程A则进入阻塞状态，直到线程B执行完成。</p>
+<p><img src="/assets/blogImg/Future%E5%BC%82%E6%AD%A5%E5%9B%9E%E8%B0%83%E6%A8%A1%E5%BC%8F_%E6%B3%A1%E8%8C%B6%E6%A1%88%E4%BE%8B.png" alt="Future异步回调模式_泡茶案例"></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.leezy.future;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@program</span>: NIOStudy</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@description</span>: 异步阻塞JOIN</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span>: LEEZY</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@create</span>: 2020-03-18 15:28</span></span><br><span class="line"><span class="comment"> **/</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">JoinDemo</span> </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> SLEEP_GAP = <span class="number">500</span>;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title">getCurThreadName</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> Thread.currentThread().getName();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">HotWaterThread</span> <span class="keyword">extends</span> <span class="title">Thread</span> </span>&#123;</span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="title">HotWaterThread</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">super</span>(<span class="string">&quot;烧水线程&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                Thread.sleep(SLEEP_GAP);</span><br><span class="line">            &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">WashThread</span> <span class="keyword">extends</span> <span class="title">Thread</span> </span>&#123;</span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="title">WashThread</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">super</span>(<span class="string">&quot;清洗线程&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                Thread.sleep(SLEEP_GAP);</span><br><span class="line">            &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Thread hotWaterThread = <span class="keyword">new</span> HotWaterThread();</span><br><span class="line">        Thread washThread = <span class="keyword">new</span> WashThread();</span><br><span class="line">        hotWaterThread.start();</span><br><span class="line">        washThread.start();</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">// 主线程阻塞，开启烧水和清洗线程</span></span><br><span class="line">            <span class="comment">// 合并烧水线程</span></span><br><span class="line">            hotWaterThread.join();</span><br><span class="line">            <span class="comment">// 合并清洗线程</span></span><br><span class="line">            washThread.join();</span><br><span class="line">            Thread.currentThread().setName(<span class="string">&quot;主线程&quot;</span>);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>join方法是有三个重载版本：</p>
+<ul>
+<li>void join():A线程等待B线程执行结束后，A线程重新恢复执行。</li>
+<li>void join(long millis):A线程等待B线程执行一段时间，最长等待时间为millis毫秒。超过millis毫秒后，不论B线程是否结束，A线程重新恢复执行。</li>
+<li>void join(long millis, int nanos)：等待B线程执行一段时间，最长等待时间为millis毫秒，加nanos纳秒。超过时间后，不论B线程是否结束，A线程重新恢复执行。</li>
+</ul>
+<p>JOIN被合并的线程没有返回值，如果需要异步线程的执行结果，就需要用到Java的FutureTask系列类。</p>
+<h3 id="FutureTask异步回调"><a href="#FutureTask异步回调" class="headerlink" title="FutureTask异步回调"></a>FutureTask异步回调</h3><ul>
+<li><p>Callable接口：Callable接口是个泛型接口，与Runnable接口类似，唯一的区别是，其抽象方法call有返回值，返回值的类型为泛型形参的实际类型。但是Callable接口的实例不能作为Thread线程实例的target来使用，而Runnable接口实例可以作为Thread线程实例的target构造参数，开启一个Thread线程。其内部进行的是异步执行的逻辑。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> java.util.concurrent;</span><br><span class="line"></span><br><span class="line"><span class="meta">@FunctionalInterface</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Callable</span>&lt;<span class="title">V</span>&gt; </span>&#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Computes a result, or throws an exception if unable to do so.</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span> computed result</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@throws</span> Exception if unable to compute a result</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function">V <span class="title">call</span><span class="params">()</span> <span class="keyword">throws</span> Exception</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li><p>FutureTask类：就像一座搭在Callable实例与Thread线程实例之间的桥。FutureTask类的内部封装一个Callable实例，然后自身间接继承了Runnable接口可以作为Thread线程的target。</p>
+</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">FutureTask</span>&lt;<span class="title">V</span>&gt; <span class="keyword">implements</span> <span class="title">RunnableFuture</span>&lt;<span class="title">V</span>&gt; </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">FutureTask</span><span class="params">(Callable&lt;V&gt; callable)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (callable == <span class="keyword">null</span>)</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> NullPointerException();</span><br><span class="line">        <span class="keyword">this</span>.callable = callable;</span><br><span class="line">        <span class="keyword">this</span>.state = NEW;       <span class="comment">// ensure visibility of callable</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.leezy.future;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.Callable;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.ExecutionException;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.FutureTask;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@program</span>: NIOStudy</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@description</span>: FutureTask类实现喝茶实例</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span>: LEEZY</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@create</span>: 2020-03-19 11:40</span></span><br><span class="line"><span class="comment"> **/</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">JavaFutureDemo</span> </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> SLEEP_GAP = <span class="number">500</span>;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title">getCurThreadName</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> Thread.currentThread().getName();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 实现Callable接口，并返回异步线程执行结果</span></span><br><span class="line">    <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">HotWaterJob</span> <span class="keyword">implements</span> <span class="title">Callable</span>&lt;<span class="title">Boolean</span>&gt; </span>&#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> Boolean <span class="title">call</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                Thread.sleep(SLEEP_GAP);</span><br><span class="line">            &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">WashJob</span> <span class="keyword">implements</span> <span class="title">Callable</span>&lt;<span class="title">Boolean</span>&gt; </span>&#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> Boolean <span class="title">call</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                Thread.sleep(SLEEP_GAP);</span><br><span class="line">            &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">drinkTea</span><span class="params">(<span class="keyword">boolean</span> waterOK, <span class="keyword">boolean</span> teacupOK)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (waterOK &amp;&amp; teacupOK) &#123;</span><br><span class="line">            System.out.println(<span class="string">&quot;喝茶&quot;</span>);</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (!waterOK) &#123;</span><br><span class="line">            System.out.println(<span class="string">&quot;烧水失败&quot;</span>);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            System.out.println(<span class="string">&quot;洗杯子失败&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 异步逻辑</span></span><br><span class="line">        Callable&lt;Boolean&gt; hotWaterJob = <span class="keyword">new</span> HotWaterJob();</span><br><span class="line">        <span class="comment">// 创建FutureTask实例，创建新的线程</span></span><br><span class="line">        FutureTask&lt;Boolean&gt; hotWaterTask = <span class="keyword">new</span> FutureTask&lt;&gt;(hotWaterJob);</span><br><span class="line">        Thread hotWaterThread = <span class="keyword">new</span> Thread(hotWaterTask, <span class="string">&quot;烧水线程&quot;</span>);</span><br><span class="line"></span><br><span class="line">        Callable&lt;Boolean&gt; washJob = <span class="keyword">new</span> WashJob();</span><br><span class="line">        FutureTask&lt;Boolean&gt; washTask = <span class="keyword">new</span> FutureTask&lt;&gt;(washJob);</span><br><span class="line">        Thread washThread = <span class="keyword">new</span> Thread(washTask, <span class="string">&quot;清洁线程&quot;</span>);</span><br><span class="line"></span><br><span class="line">        hotWaterThread.start();</span><br><span class="line">        washThread.start();</span><br><span class="line"></span><br><span class="line">        Thread.currentThread().setName(<span class="string">&quot;主线程&quot;</span>);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            Boolean waterOK = hotWaterTask.get();</span><br><span class="line">            Boolean teacupOK = washTask.get();</span><br><span class="line">            drinkTea(waterOK, teacupOK);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException | ExecutionException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p><code>P.S.FutureTask和Callable都是泛型类，泛型参数表示返回结果的类型。所以，在使用的时候，它们两个实例的泛型参数一定需要保持一致</code></p>
+<ul>
+<li>Future接口<br>Java将FutureTask类的一系列操作，抽象出来作为一个重要的接口，Future接口。主要提供了三个功能</li>
+</ul>
+<ol>
+<li>判断并发任务是否执行完成</li>
+<li>获取并发的任务完成后的结果</li>
+<li>取消并发执行中的任务</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Future</span>&lt;<span class="title">V</span>&gt; </span>&#123;</span><br><span class="line">    <span class="comment">// 取消并发任务执行</span></span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">cancel</span><span class="params">(<span class="keyword">boolean</span> mayInterruptIfRunning)</span></span>;</span><br><span class="line">    <span class="comment">// 获取并发任务取消状态</span></span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">isCancelled</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="comment">// 获取并发任务执行状态</span></span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">isDone</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="comment">// 获取并发任务执行结果；阻塞性的，如果并发任务没有执行完成，调用该方法会一直阻塞直到并发任务执行完成</span></span><br><span class="line">    <span class="function">V <span class="title">get</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException, ExecutionException</span>;</span><br><span class="line">    <span class="comment">// 获取并发任务执行结果；阻塞性的，如果阻塞时间超过设定的timeout时间，该方法会抛出异常</span></span><br><span class="line">    <span class="function">V <span class="title">get</span><span class="params">(<span class="keyword">long</span> timeout, TimeUnit unit)</span> <span class="keyword">throws</span> InterruptedException, ExecutionException, TimeoutException</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>以上2种办法，通过FutureTask类和Join方法都是异步阻塞模式，效率都是比较低的。</p>
+<h3 id="Guava的异步调用"><a href="#Guava的异步调用" class="headerlink" title="Guava的异步调用"></a>Guava的异步调用</h3><p>Guava增强了java.util.concurrent包，为了实现非阻塞获取异步线程的结果，Guava对Java的异步回调机制做了2个方面的增强。</p>
+<ol>
+<li>ListenableFuture，继承了Java的Future接口，使Java的Future异步任务在Guava中能被监控和获取非阻塞异步执行的结果。</li>
+<li>FutureCallback，新接口，该接口的目的是在异步任务执行完成后，根据异步结果，完成不同的回调处理，可以处理异步结果。</li>
+</ol>
+<ul>
+<li>FutureCallBack</li>
+</ul>
+<ol>
+<li>onSuccess()： 在异步任务执行成功后被回调；调用时，异步任务的执行结果，作为onSuccess方法的参数被传入。</li>
+</ol>
+<ol start="2">
+<li>onFailure()：在异步任务执行过程中，抛出异常时被回调；调用时，异步任务所抛出的异常，作为onFailure方法的参数被传入。</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">FutureCallback</span>&lt;<span class="title">V</span>&gt; </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">onSuccess</span><span class="params">(<span class="meta">@Nullable</span> V var1)</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">onFailure</span><span class="params">(Throwable var1)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>ListenableFuture</li>
+</ul>
+<p>继承自Java的Future接口，增加了一个addListener方法，作用是将FutureCallback的回调封装成一个内部的Runnable异步回调任务，在Callable异步任务完成后，回调FutureCallback进行处理。</p>
+<p>在实际编程中，将FutureCallback回调逻辑绑定到ListenableFuture的异步任务，可以通过Guava的Futures工具类的addCallback静态方法。</p>
+<p>获取Guava的ListenableFuture异步任务实例，主要通过线程池ThreadPool提交Callable任务的方式来获取。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">nativeFuture</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">    <span class="comment">// Java自带的Future模式，实现异步</span></span><br><span class="line">    ExecutorService nativeExecutor = Executors.newSingleThreadExecutor();</span><br><span class="line">    Future&lt;String&gt; nativeFuture = nativeExecutor.submit(<span class="keyword">new</span> Callable&lt;String&gt;() &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> String <span class="title">call</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">            <span class="comment">// 使用sleep模拟调用耗时</span></span><br><span class="line">            TimeUnit.SECONDS.sleep(<span class="number">1</span>);</span><br><span class="line">            <span class="keyword">return</span> <span class="string">&quot;[&quot;</span> + Thread.currentThread().getName() + <span class="string">&quot;]: 并发包Future返回结果&quot;</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="comment">// Future只实现了异步，没有实现回调。此时主线程get结果时阻塞，可以轮询获取异步调用是否完成</span></span><br><span class="line">    System.out.println(<span class="string">&quot;[&quot;</span> + Thread.currentThread().getName() + <span class="string">&quot;] ==&gt;&quot;</span> + nativeFuture.get());</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">guavaFuture</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="comment">// Guava异步回调</span></span><br><span class="line">    ExecutorService executorService = Executors.newSingleThreadExecutor();</span><br><span class="line">    ListeningExecutorService guavaExecutor = MoreExecutors.listeningDecorator(executorService);</span><br><span class="line">    <span class="keyword">final</span> ListenableFuture&lt;String&gt; listenableFuture = guavaExecutor.submit(<span class="keyword">new</span> Callable&lt;String&gt;() &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> String <span class="title">call</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">            TimeUnit.SECONDS.sleep(<span class="number">1</span>);</span><br><span class="line">            <span class="keyword">return</span> <span class="string">&quot;[&quot;</span> + Thread.currentThread().getName() + <span class="string">&quot;]: guava的Future返回结果&quot;</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="comment">// 注册监听器，即异步调用完成时回在指定的线程Executors.newSingleThreadExecutor()中执行注册的监听器</span></span><br><span class="line">    listenableFuture.addListener(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                String str = <span class="string">&quot;[&quot;</span> + Thread.currentThread().getName() + <span class="string">&quot;]: guava对返回结果进行异步CallBack(Runnable):&quot;</span> + listenableFuture.get();</span><br><span class="line">                System.out.println(str);</span><br><span class="line">            &#125; <span class="keyword">catch</span> (ExecutionException | InterruptedException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;, Executors.newSingleThreadExecutor());</span><br><span class="line">    <span class="comment">// 主线程可以继续执行，异步完成后会执行注册的监听器任务.</span></span><br><span class="line">    System.out.println(<span class="string">&quot;[&quot;</span> + Thread.currentThread().getName() + <span class="string">&quot;]: guavaFuture执行结束&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">guavaFuture2</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 除了ListenableFuture，guava还提供了FutureCallback接口</span></span><br><span class="line">    ExecutorService executorService2 = Executors.newSingleThreadExecutor();</span><br><span class="line">    ListeningExecutorService guavaExecutor2 = MoreExecutors.listeningDecorator(executorService2);</span><br><span class="line">    <span class="keyword">final</span> ListenableFuture&lt;String&gt; listenableFuture2 = guavaExecutor2.submit(<span class="keyword">new</span> Callable&lt;String&gt;() &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> String <span class="title">call</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">            TimeUnit.SECONDS.sleep(<span class="number">1</span>);</span><br><span class="line">            <span class="keyword">return</span> <span class="string">&quot;[&quot;</span> + Thread.currentThread().getName() + <span class="string">&quot;]: guava的Future返回结果&quot;</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">    Futures.addCallback(listenableFuture2, <span class="keyword">new</span> FutureCallback&lt;String&gt;() &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onSuccess</span><span class="params">(<span class="meta">@Nullable</span> String result)</span> </span>&#123;</span><br><span class="line">            String str = <span class="string">&quot;[&quot;</span> + Thread.currentThread().getName() + <span class="string">&quot;]=======&gt;对回调结果【&quot;</span> + result + <span class="string">&quot;】进行FutureCallback&quot;</span>;</span><br><span class="line">            System.out.println(str);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onFailure</span><span class="params">(Throwable throwable)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;, Executors.newSingleThreadExecutor());</span><br><span class="line">    <span class="comment">// 主线程可以继续执行,异步完成后会执行注册的监听器任务.</span></span><br><span class="line">    System.out.println( <span class="string">&quot;[&quot;</span> + Thread.currentThread().getName() +<span class="string">&quot;]: guavaFuture2执行结束&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>执行结果：</p>
+<figure class="highlight shell"><figcaption><span>script</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[main] ==&gt;[pool-1-thread-1]: 并发包Future返回结果</span><br><span class="line">[main]: guavaFuture执行结束</span><br><span class="line">[pool-3-thread-1]: guava对返回结果进行异步CallBack(Runnable):[pool-2-thread-1]: guava的Future返回结果</span><br><span class="line">[main]: guavaFuture2执行结束</span><br><span class="line">[pool-5-thread-1]=======&gt;对回调结果【[pool-4-thread-1]: guava的Future返回结果】进行FutureCallback</span><br></pre></td></tr></table></figure>
+
+<h3 id="Netty的异步回调模式"><a href="#Netty的异步回调模式" class="headerlink" title="Netty的异步回调模式"></a>Netty的异步回调模式</h3><p>Netty对JavaFuture异步任务拓展如下：</p>
+<ol>
+<li>继承Java的Future接口；</li>
+<li>定义GenericFutureListener接口，异步执行结果监听器。</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Java/" rel="tag"># Java</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/03/15/JAVA%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86-Reactor%E5%8F%8D%E5%BA%94%E5%99%A8%E6%A8%A1%E5%BC%8F/" rel="prev" title="JAVA基础知识-Reactor反应器模式">
+      <i class="fa fa-chevron-left"></i> JAVA基础知识-Reactor反应器模式
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/04/13/Maven%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/" rel="next" title="Maven学习记录">
+      Maven学习记录 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#JOIN%E5%BC%82%E6%AD%A5%E9%98%BB%E5%A1%9E"><span class="nav-number">1.</span> <span class="nav-text">JOIN异步阻塞</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#FutureTask%E5%BC%82%E6%AD%A5%E5%9B%9E%E8%B0%83"><span class="nav-number">2.</span> <span class="nav-text">FutureTask异步回调</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Guava%E7%9A%84%E5%BC%82%E6%AD%A5%E8%B0%83%E7%94%A8"><span class="nav-number">3.</span> <span class="nav-text">Guava的异步调用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Netty%E7%9A%84%E5%BC%82%E6%AD%A5%E5%9B%9E%E8%B0%83%E6%A8%A1%E5%BC%8F"><span class="nav-number">4.</span> <span class="nav-text">Netty的异步回调模式</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">LEEZY</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">37</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">LEEZY</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

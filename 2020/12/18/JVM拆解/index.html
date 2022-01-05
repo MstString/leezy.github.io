@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.leezy.top","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="JVM学习笔记">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JVM拆解">
+<meta property="og:url" content="https://www.leezy.top/2020/12/18/JVM%E6%8B%86%E8%A7%A3/index.html">
+<meta property="og:site_name" content="SAKURA">
+<meta property="og:description" content="JVM学习笔记">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-12-17T16:15:00.000Z">
+<meta property="article:modified_time" content="2021-12-08T14:25:46.111Z">
+<meta property="article:author" content="LEEZY">
+<meta property="article:tag" content="JAVA">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://www.leezy.top/2020/12/18/JVM%E6%8B%86%E8%A7%A3/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>JVM拆解 | SAKURA</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">SAKURA</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://www.leezy.top/2020/12/18/JVM%E6%8B%86%E8%A7%A3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="LEEZY">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="SAKURA">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          JVM拆解
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-12-18 00:15:00" itemprop="dateCreated datePublished" datetime="2020-12-18T00:15:00+08:00">2020-12-18</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-12-08 22:25:46" itemprop="dateModified" datetime="2021-12-08T22:25:46+08:00">2021-12-08</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>JVM学习笔记</p>
+<span id="more"></span>
+
+<h3 id="JVM-加载类"><a href="#JVM-加载类" class="headerlink" title="JVM 加载类"></a>JVM 加载类</h3><p>加载 -&gt; 链接 -&gt; 初始化</p>
+<ul>
+<li><p>加载<br>是指查找字节流，并且据此创建类的过程。加载需要借助类加载器，在 Java 虚拟机中，类加载器使用了双亲委派模型，即接收到加载请求时，会先将请求转发给父类加载器。数组类是JVM虚拟机直接生成的，其他类需要借助类加载器完成查找字节流的过程的。在 Java 虚拟机中，类的唯一性是由类加载器实例以及类的全名一同确定的。即便是同一串字节流，经由不同的类加载器加载，也会得到两个不同的类。</p>
+</li>
+<li><p>链接<br>链接: 是指将创建成的类合并至 Java 虚拟机中，使之能够执行的过程。它可分为验证、准备以及解析三个阶段。<br>验证: 在于确保被加载类能够满足 Java 虚拟机的约束条件<br>准备: 为被加载类的静态字段分配内存<br>解析：正是将这些符号引用解析成为实际引用。如果符号引用指向一个未被加载的类，或者未被加载类的字段或方法，那么解析将触发这个类的加载（但未必触发这个类的链接以及初始化。）</p>
+</li>
+<li><p>初始化<br>如果直接赋值的静态字段被 final 所修饰，并且它的类型是基本类型或字符串时，那么该字段便会被 Java 编译器标记成常量值（ConstantValue），其初始化直接由 Java 虚拟机完成。除此之外的直接赋值操作，以及所有静态代码块中的代码，则会被 Java 编译器置于同一方法中，并把它命名为 &lt; clinit &gt;。</p>
+</li>
+<li><p>JAVA中获取类的方式：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 四种</span></span><br><span class="line">Calss c1 = Class.forName(<span class="string">&quot;com.leezy.top.Coder&quot;</span>);</span><br><span class="line">Class c2 = Coder.getClass();</span><br><span class="line">Class c3 = Coder.class;</span><br><span class="line"><span class="comment">// 基本内置类型的包装类都有一个Type属性</span></span><br><span class="line">Class&lt;Integer&gt; type = Integer.TYPE;</span><br><span class="line"><span class="comment">// 获取父类</span></span><br><span class="line">Class superClass = c1.getSuperClass();</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="JVM处理异常"><a href="#JVM处理异常" class="headerlink" title="JVM处理异常"></a>JVM处理异常</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">      <span class="comment">// 异常监控的代码</span></span><br><span class="line">    &#125; <span class="keyword">catch</span>() &#123;</span><br><span class="line">      <span class="comment">// catch 代码块所捕获的异常类型不能覆盖后边的，否则编译器会报错</span></span><br><span class="line">    &#125; <span class="keyword">catch</span>() &#123;</span><br><span class="line"></span><br><span class="line">    &#125; <span class="keyword">catch</span>() &#123;</span><br><span class="line"></span><br><span class="line">    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">      <span class="comment">// 必定会运行的代码</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>异常分为检查异常(checked exception)和非检查异常(unchecked exception), RuntimeException 和 Error是非检查异常，其他继承Throwable的Exception都是检查异常，需要程序显式的捕获或者在方法头用throws关键字声明;<br>需要注意的是异常的捕获是比较耗费性能的一件事，这是由于在构造异常实例时，Java 虚拟机便需要生成该异常的栈轨迹(stack trace);<br>在编译生成的字节码中，每个方法都附带一个异常表。异常表中的每一个条目代表一个异常处理器，并且由 from 指针、to 指针、target 指针以及所捕获的异常类型构成。这些指针的值是字节码索引，用以定位字节码。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Test</span> </span>&#123;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">int</span> tryBlock;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">int</span> catchBlock;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">int</span> finallyBlock;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">int</span> methodExit;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            tryBlock = <span class="number">0</span>;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            catchBlock = <span class="number">1</span>;</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            finallyBlock = <span class="number">2</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        methodExit = <span class="number">3</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 字节码</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Test</span> </span>&#123;</span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="title">Test</span><span class="params">()</span></span>;</span><br><span class="line">    Code:</span><br><span class="line">       <span class="number">0</span>: aload_0</span><br><span class="line">       <span class="number">1</span>: invokespecial #<span class="number">1</span>                  <span class="comment">// Method java/lang/Object.&quot;&lt;init&gt;&quot;:()V</span></span><br><span class="line">       <span class="number">4</span>: <span class="keyword">return</span></span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(java.lang.String[])</span></span>;</span><br><span class="line">    Code:</span><br><span class="line">       <span class="number">0</span>: iconst_0</span><br><span class="line">       <span class="number">1</span>: putstatic     #<span class="number">2</span>                  <span class="comment">// Field tryBlock:I</span></span><br><span class="line">       <span class="number">4</span>: iconst_2</span><br><span class="line">       <span class="number">5</span>: putstatic     #<span class="number">3</span>                  <span class="comment">// Field finallyBlock:I - 1</span></span><br><span class="line">       <span class="number">8</span>: goto          <span class="number">30</span></span><br><span class="line">      <span class="number">11</span>: astore_1</span><br><span class="line">      <span class="number">12</span>: iconst_1</span><br><span class="line">      <span class="number">13</span>: putstatic     #<span class="number">5</span>                  <span class="comment">// Field catchBlock:I</span></span><br><span class="line">      <span class="number">16</span>: iconst_2</span><br><span class="line">      <span class="number">17</span>: putstatic     #<span class="number">3</span>                  <span class="comment">// Field finallyBlock:I - 2</span></span><br><span class="line">      <span class="number">20</span>: goto          <span class="number">30</span></span><br><span class="line">      <span class="number">23</span>: astore_2</span><br><span class="line">      <span class="number">24</span>: iconst_2</span><br><span class="line">      <span class="number">25</span>: putstatic     #<span class="number">3</span>                  <span class="comment">// Field finallyBlock:I - 3</span></span><br><span class="line">      <span class="number">28</span>: aload_2</span><br><span class="line">      <span class="number">29</span>: athrow</span><br><span class="line">      <span class="number">30</span>: iconst_3</span><br><span class="line">      <span class="number">31</span>: putstatic     #<span class="number">6</span>                  <span class="comment">// Field methodExit:I</span></span><br><span class="line">      <span class="number">34</span>: <span class="keyword">return</span></span><br><span class="line">    Exception table:</span><br><span class="line">       from    to  target type</span><br><span class="line">           <span class="number">0</span>     <span class="number">4</span>    <span class="number">11</span>   Class java/lang/Exception</span><br><span class="line">           <span class="number">0</span>     <span class="number">4</span>    <span class="number">23</span>   any <span class="comment">// 指向复制的finally代码块</span></span><br><span class="line">          <span class="number">11</span>    <span class="number">16</span>    <span class="number">23</span>   any <span class="comment">// 指向复制的finally代码块</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>finally方法一定会执行，因为JVM虚拟机会复制finally代码块的内容，分别放在try-catch代码块所有正常执行路径以及异常执行路径的出口中。</p>
+<h3 id="JVM反射机制"><a href="#JVM反射机制" class="headerlink" title="JVM反射机制"></a>JVM反射机制</h3><p>反射是 Java 语言中一个相当重要的特性，它允许正在运行的 Java 程序观测，甚至是修改程序的动态行为。<br>在默认情况下，方法的反射调用为委派实现，委派给本地实现来进行方法调用。在调用超过 15 次之后，委派实现便会将委派对象切换至动态实现。这个动态实现的字节码是自动生成的，它将直接使用 invoke 指令来调用目标方法。<br>拿到类后如何使用反射</p>
+<ol>
+<li>使用 newInstance() 来生成一个该类的实例。它要求该类中拥有一个无参数的构造器。P.S. 可以提高软件的可伸缩性、可扩展性。</li>
+<li>使用 isInstance(Object) 来判断一个对象是否该类的实例，语法上等同于 instanceof 关键字。</li>
+<li>使用 Array.newInstance(Class,int) 来构造该类型的数组。</li>
+<li>使用 getFields()/getConstructors()/getMethods() 来访问该类的成员。方法名中带 Declared 的不会返回父类的成员，但是会返回私有成员；而不带 Declared 的则相反。<br>拿到类后可以做：</li>
+</ol>
+<ul>
+<li>使用 Constructor/Field/Method.setAccessible(true) 来绕开 Java 语言的访问限制。</li>
+<li>使用 Constructor.newInstance(Object[]) 来生成该类的实例。</li>
+<li>使用 Field.get/set(Object) 来访问字段的值。</li>
+<li>使用 Method.invoke(Object, Object[]) 来调用方法。</li>
+</ul>
+<h3 id="JVM执行方法调用"><a href="#JVM执行方法调用" class="headerlink" title="JVM执行方法调用"></a>JVM执行方法调用</h3><ul>
+<li>重载与重写，重载指的是方法名相同而参数类型不相同的方法之间的关系，重写指的是方法名相同并且参数类型也相同的方法之间的关系。<br>如果子类定义了与父类中非私有方法同名的方法，而且这两个方法的参数类型相同，如果这两个方法都是静态的，那么子类中的方法隐藏了父类中的方法。如果这两个方法都不是静态的，且都不是私有的，那么子类的方法重写了父类中的方法。</li>
+<li>JAVA编译器对重载方法的选取规则：</li>
+</ul>
+<ol>
+<li>在不考虑对基本类型自动装拆箱，以及可变长参数的情况下选取重载方法；</li>
+<li>如果在第 1 个阶段中没有找到适配的方法，那么在允许自动装拆箱，但不允许可变长参数的情况下选取重载方法；</li>
+<li>如果在第 2 个阶段中没有找到适配的方法，那么在允许自动装拆箱以及可变长参数的情况下选取重载方法。<br>Java识别方法只看方法名和参数类型，而JVM识别方法类名、方法名以及方法描述符。 在Java中，返回类型不一致而其他全部一致不算重载。Java 虚拟机中的静态绑定指的是在解析时便能够直接识别目标方法的情况，而动态绑定则指的是需要在运行过程中根据调用者的动态类型来识别目标方法的情况。</li>
+</ol>
+<ul>
+<li>静态绑定和动态绑定<br>具体来说，Java 字节码中与调用相关的指令共有五种。</li>
+</ul>
+<ol>
+<li>invokestatic：用于调用静态方法。</li>
+<li>invokespecial：用于调用私有实例方法、构造器，以及使用 super 关键字调用父类的实例方法或构造器，和所实现接口的默认方法。</li>
+<li>invokevirtual：用于调用非私有实例方法。</li>
+<li>invokeinterface：用于调用接口方法。</li>
+<li>invokedynamic：用于调用动态方法。<br>虚方法调用包括 invokevirtual 指令和 invokeinterface 指令。如果这两种指令所声明的目标方法被标记为 final，那么 Java 虚拟机会采用静态绑定。否则，Java 虚拟机将采用动态绑定，在运行过程中根据调用者的动态类型，来决定具体的目标方法。</li>
+</ol>
+<h3 id="JAVA对象的内存分布"><a href="#JAVA对象的内存分布" class="headerlink" title="JAVA对象的内存分布"></a>JAVA对象的内存分布</h3><p>JAVA程序中新建对象的方式有：</p>
+<ul>
+<li>new方法<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">User user = <span class="keyword">new</span> User();</span><br><span class="line"></span><br><span class="line"><span class="comment">// Foo foo = new Foo(); 编译而成的字节码</span></span><br><span class="line">  <span class="number">0</span> <span class="keyword">new</span> Foo</span><br><span class="line">  <span class="number">3</span> dup</span><br><span class="line">  <span class="number">4</span> <span class="function">invokespecial <span class="title">Foo</span><span class="params">()</span></span></span><br><span class="line"><span class="function">  7 astore_1</span></span><br></pre></td></tr></table></figure>
+当我们调用一个构造器时，它将优先调用父类的构造器，直至 Object 类。这些构造器的调用者皆为同一对象，也就是通过 new 指令新建而来的对象。通过 new 指令新建出来的对象，它的内存其实涵盖了所有父类中的实例字段。也就是说，虽然子类无法访问父类的私有实例字段，或者子类的实例字段隐藏了父类的同名实例字段，但是子类的实例还是会为这些父类实例字段分配内存的。</li>
+<li>反射机制<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">User user = (User) Class.forName(<span class="string">&quot;com.leezy.top.User&quot;</span>).newInstance(); </span><br><span class="line"><span class="comment">// 当需要调用类的带参数的构造函数时，应该采用 Constructor.newInstance()，</span></span><br></pre></td></tr></table></figure>
+newInstance创建对象实例的时候仅能调用<code>无参的构造函数</code>，所以必需确保类中有无参数的构造函数，否则将会抛出java.lang.InstantiationException异常，无法进行实例化。</li>
+<li>Object.clone<br>需要被克隆的对象需要实现<code>Cloneable</code>接口<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">User u1 = <span class="keyword">new</span> User();</span><br><span class="line">User u2 = (User)u1.clone();</span><br></pre></td></tr></table></figure>
+需要注意的是，基于克隆(原型模式)创建对象的方式是浅拷贝，如果对象的属性为引用类型，则仅复制地址。</li>
+<li>反序列化<br>序列化需要实现<code>Serializable</code>接口，反序列化获取对象的方式如下：<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ObjectInputStream o1 = <span class="keyword">new</span> ObjectInputStream(<span class="keyword">new</span> FileInputStream(<span class="string">&quot;User.txt&quot;</span>));</span><br><span class="line">User u1 = (User)o1.readObject();</span><br></pre></td></tr></table></figure></li>
+<li>Unsafe.allocateInstance<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 会绕过对象初始化阶段并绕过构造器的安全检查，慎用</span></span><br><span class="line">User instance = (User) UNSAFE.allocateInstance(User.class);</span><br></pre></td></tr></table></figure>
+在 Java 虚拟机中，每个 Java 对象都有一个对象头（object header），这个由标记字段和类型指针所构成。其中，标记字段用以存储 Java 虚拟机有关该对象的运行数据，如哈希码、GC 信息以及锁信息，而类型指针则指向该对象的类。在 64 位的 Java 虚拟机中，对象头的标记字段占 64 位，而类型指针又占了 64 位。也就是说，每一个 Java 对象在内存中的额外开销就是 16 个字节。为了节约空间，减少对象内存的使用量，64 位 Java 虚拟机引入了<code>压缩指针</code>的概念（对应虚拟机选项 -XX:+UseCompressedOops，默认开启），对象头中的类型指针也会被压缩成 32 位，使得对象头的大小从 16 字节降至 12 字节。同事默认情况下，Java 虚拟机堆中对象的起始地址需要对齐至 8 的倍数，（对应虚拟机选项 -XX:ObjectAlignmentInBytes，默认值为 8），同时压缩指针会让虚拟机在分配字段的顺序时进行<code>字段重排列</code>。<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span> </span>&#123;</span><br><span class="line">  <span class="keyword">long</span> l;</span><br><span class="line">  <span class="keyword">int</span> i；</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">B</span> <span class="keyword">extends</span> <span class="title">A</span> </span>&#123;</span><br><span class="line">  <span class="keyword">long</span> l;</span><br><span class="line">  <span class="keyword">int</span> i;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">// 启用压缩指针时，B类的字段分布</span></span><br><span class="line">B object internals:</span><br><span class="line"> OFFSET  SIZE   TYPE DESCRIPTION</span><br><span class="line">      <span class="number">0</span>     <span class="number">4</span>        (object header)</span><br><span class="line">      <span class="number">4</span>     <span class="number">4</span>        (object header)</span><br><span class="line">      <span class="number">8</span>     <span class="number">4</span>        (object header)</span><br><span class="line">     <span class="number">12</span>     <span class="number">4</span>    <span class="keyword">int</span> A.i                                       <span class="number">0</span></span><br><span class="line">     <span class="number">16</span>     <span class="number">8</span>   <span class="keyword">long</span> A.l                                       <span class="number">0</span></span><br><span class="line">     <span class="number">24</span>     <span class="number">8</span>   <span class="keyword">long</span> B.l                                       <span class="number">0</span></span><br><span class="line">     <span class="number">32</span>     <span class="number">4</span>    <span class="keyword">int</span> B.i                                       <span class="number">0</span></span><br><span class="line">     <span class="number">36</span>     <span class="number">4</span>        (loss due to the next object alignment)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 关闭压缩指针时，B类的字段分布</span></span><br><span class="line">B object internals:</span><br><span class="line"> OFFSET  SIZE   TYPE DESCRIPTION</span><br><span class="line">      <span class="number">0</span>     <span class="number">4</span>        (object header)</span><br><span class="line">      <span class="number">4</span>     <span class="number">4</span>        (object header)</span><br><span class="line">      <span class="number">8</span>     <span class="number">4</span>        (object header)</span><br><span class="line">     <span class="number">12</span>     <span class="number">4</span>        (object header)</span><br><span class="line">     <span class="number">16</span>     <span class="number">8</span>   <span class="keyword">long</span> A.l</span><br><span class="line">     <span class="number">24</span>     <span class="number">4</span>    <span class="keyword">int</span> A.i</span><br><span class="line">     <span class="number">28</span>     <span class="number">4</span>        (alignment/padding gap)                  </span><br><span class="line">     <span class="number">32</span>     <span class="number">8</span>   <span class="keyword">long</span> B.l</span><br><span class="line">     <span class="number">40</span>     <span class="number">4</span>    <span class="keyword">int</span> B.i</span><br><span class="line">     <span class="number">44</span>     <span class="number">4</span>        (loss due to the next object alignment)</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="JVM垃圾回收机制"><a href="#JVM垃圾回收机制" class="headerlink" title="JVM垃圾回收机制"></a>JVM垃圾回收机制</h3><p>在JVM中，垃圾就是无引用对象所占用的堆内存空间, 比如对象a和对象b相互引用, 但是再没有其他引用指向a或者b, 此时a和b对象占用的内存空间就是垃圾。目前 Java 虚拟机的主流垃圾回收器采取的是可达性分析算法。这个算法的实质在于将一系列 GC Roots 作为初始的存活对象合集（live set），然后从该合集出发，探索所有能够被该集合引用到的对象，并将其加入到该集合中，这个过程我们也称之为标记（mark）。最终，未被探索到的对象便是死亡的，是可以回收的。传统的垃圾回收算法采用的是一种简单粗暴的方式，那便是 Stop-the-world，停止其他非垃圾回收线程的工作，直到完成垃圾回收。这也就造成了垃圾回收所谓的暂停时间（GC pause）。Java 虚拟机中的 Stop-the-world 是通过安全点（safepoint）机制来实现的。当 Java 虚拟机收到 Stop-the-world 请求，它便会等待所有的线程都到达安全点，才允许请求 Stop-the-world 的线程进行独占的工作。<br>具体垃圾回收的方式：</p>
+<ul>
+<li>清除： 即把死亡对象所占据的内存标记为空闲内存，并记录在一个空闲列表（free list）之中。当需要新建对象时，内存管理模块便会从该空闲列表中寻找空闲内存，并划分给新建的对象。一是会造成内存碎片。由于 Java 虚拟机的堆中对象必须是连续分布的，因此可能出现总空闲内存足够，但是无法分配的极端情况。二是分配效率较低。如果是一块连续的内存空间，那么我们可以通过指针加法（pointer bumping）来做分配。而对于空闲列表，Java 虚拟机则需要逐个访问列表中的项，来查找能够放入新建对象的空闲内存。</li>
+<li>压缩： 即把存活的对象聚集到内存区域的起始位置，从而留下一段连续的内存空间。这种做法能够解决内存碎片化的问题，但代价是压缩算法的性能开销。</li>
+<li>复制：把内存区域分为两等分，分别用两个指针 from 和 to 来维护，并且只是用 from 指针指向的内存区域来分配内存。当发生垃圾回收时，便把存活的对象复制到 to 指针指向的内存区域中，并且交换 from 指针和 to 指针的内容。但缺点是空间使用率低。</li>
+</ul>
+<p>JVM堆内存的使用是符合二八原则的，JVM将堆内存划分为了新生代和老生代，新生代用来存储新建的对象。当对象存活时间够长时，则将其移动到老年代。其中，新生代又被划分为<code>Eden区</code>，以及两个大小相同的<code>Survivor区</code>, 非空的那个用<code>form</code>指针指向，空的那个用<code>to</code>指针指向。为了解决Eden区堆内存线程共享导致两个对象共同引用一段内存的问题，JVM使用了一种叫Thread Local Allocation Buffer，对应虚拟机参数 -XX:+UseTLAB，默认开启）。具体来说，每个线程可以向 Java 虚拟机申请一段连续的内存，比如 2048 字节，作为线程私有的 TLAB。这个操作需要加锁，线程需要维护两个指针（实际上可能更多，但重要也就两个），一个指向 TLAB 中空余内存的起始位置，一个则指向 TLAB 末尾。如果加法后空余内存指针的值仍小于或等于指向末尾的指针，则代表分配成功。否则，TLAB 已经没有足够的空间来满足本次新建操作。这个时候，便需要当前线程重新申请新的 TLAB。<br>默认情况下，Java 虚拟机采取的是一种动态分配的策略（对应 Java 虚拟机参数 -XX:+UsePSAdaptiveSurvivorSizePolicy），根据生成对象的速率，以及 Survivor 区的使用情况动态调整 Eden 区和 Survivor 区的比例。当Eden区空间耗尽时，Java 虚拟机便会触发一次 Minor GC，来收集新生代的垃圾。存活下来的对象，则会被送到 Survivor 区。MonitorGC其实就是上面的<code>复制</code>操作。<br>Java 虚拟机会记录 Survivor 区中的对象一共被来回复制了几次。如果一个对象被复制的次数为 15（对应虚拟机参数 -XX:+MaxTenuringThreshold），那么该对象将被晋升（promote）至老年代。另外，如果单个 Survivor 区已经被占用了 50%（对应虚拟机参数 -XX:TargetSurvivorRatio），那么较高复制次数的对象也会被晋升至老年代。<br>MonitorGC避免了垃圾回收中的全堆扫描问题，但是老年代的对象可能引用新生代的对象还是会导致全堆扫描，所以JVM引入了一个卡表的概念，即将整个堆划分为一个个大小为 512 字节的卡，并且维护一个卡表，用来存储每张卡的一个标识位。这个标识位代表对应的卡是否可能存有指向新生代对象的引用。如果可能存在，那么我们就认为这张卡是脏的。在进行 Minor GC 的时候，我们便可以不用扫描整个老年代，而是在卡表中寻找脏卡，并将脏卡中的对象加入到 Minor GC 的 GC Roots 里。当完成所有脏卡的扫描之后，Java 虚拟机便会将所有脏卡的标识位清零。</p>
+<h3 id="JAVA常用工具"><a href="#JAVA常用工具" class="headerlink" title="JAVA常用工具"></a>JAVA常用工具</h3><ul>
+<li>jps 打印所有正在运行的 Java 进程的相关信息</li>
+<li>jstat 打印目标 Java 进程的性能数据<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jstat -gcutil  17079 5000 10</span><br></pre></td></tr></table></figure></li>
+<li>jmap 允许用户统计目标 Java 进程的堆中存放的 Java 对象，并将它们导出成二进制文件。配合<code>eclipse MAT</code>使用比较好，可以图形展示。<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> -clstats，该子命令将打印被加载类的信息。</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> -histo 该子命令将统计各个类的实例数目以及占用内存，并按照内存使用量从多至少的顺序排列。此外，-histo:live只统计堆中的存活对象。</span></span><br><span class="line">jmap -dump:live,format=b,file=filename.bin</span><br></pre></td></tr></table></figure></li>
+<li>jinfo 查看和修改目标 Java 进程的参数</li>
+<li>jstack 用来打印目标 Java 进程中各个线程的栈轨迹，以及这些线程所持有的锁。</li>
+<li>javap java-&gt;javac-&gt;javap 查阅 Java 字节码</li>
+<li>OPENJDK工具集<br><a target="_blank" rel="noopener" href="http://openjdk.java.net/projects/code-tools/">http://openjdk.java.net/projects/code-tools/</a></li>
+<li>jcmd 可以替换除了jstat外的所有命令<br><a target="_blank" rel="noopener" href="https://docs.oracle.com/en/java/javase/11/tools/jcmd.html">https://docs.oracle.com/en/java/javase/11/tools/jcmd.html</a></li>
+<li>ASM </li>
+<li>Java Mission Control<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> JFR 将在 Java 虚拟机启动之后持续收集数据，直至进程退出</span></span><br><span class="line">java -XX:StartFlightRecording=dumponexit=true,filename=myrecording.jfr MyApp</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="JVM启动参数说明"><a href="#JVM启动参数说明" class="headerlink" title="JVM启动参数说明"></a>JVM启动参数说明</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> JVM启动时分配的内存</span></span><br><span class="line">-Xms </span><br><span class="line"><span class="meta">#</span><span class="bash"> JVM运行过程中分配的最大内存</span></span><br><span class="line">-Xmx</span><br><span class="line"><span class="meta">#</span><span class="bash"> JVM为每个线程分配的内存大小</span></span><br><span class="line">-Xss</span><br><span class="line"><span class="meta">#</span><span class="bash"> 年轻代大小 JVM内存 = 年轻代 + 年老代 + 持久代（64M）</span></span><br><span class="line">-Xmn</span><br><span class="line"><span class="meta">#</span><span class="bash"> 选择年轻代垃圾收集器为并行收集器</span></span><br><span class="line">-XX:+UseParallelGC</span><br><span class="line"><span class="meta">#</span><span class="bash"> 配置年老代垃圾收集方式为并行收集</span></span><br><span class="line">-XX:+UseParallelOldGC</span><br><span class="line"><span class="meta">#</span><span class="bash"> 查看参数</span></span><br><span class="line">java -XX:+PrintFlagsFinal -version | grep &#123;XXX&#125;</span><br></pre></td></tr></table></figure>
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/JAVA/" rel="tag"># JAVA</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/04/18/Netty%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0/" rel="prev" title="Netty框架学习">
+      <i class="fa fa-chevron-left"></i> Netty框架学习
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/01/15/MySQL%E9%AB%98%E5%8F%AF%E7%94%A8%E4%B8%AD%E9%97%B4%E4%BB%B6%E6%96%B9%E6%A1%88/" rel="next" title="MySQL高可用中间件方案选型">
+      MySQL高可用中间件方案选型 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#JVM-%E5%8A%A0%E8%BD%BD%E7%B1%BB"><span class="nav-number">1.</span> <span class="nav-text">JVM 加载类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#JVM%E5%A4%84%E7%90%86%E5%BC%82%E5%B8%B8"><span class="nav-number">2.</span> <span class="nav-text">JVM处理异常</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#JVM%E5%8F%8D%E5%B0%84%E6%9C%BA%E5%88%B6"><span class="nav-number">3.</span> <span class="nav-text">JVM反射机制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#JVM%E6%89%A7%E8%A1%8C%E6%96%B9%E6%B3%95%E8%B0%83%E7%94%A8"><span class="nav-number">4.</span> <span class="nav-text">JVM执行方法调用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#JAVA%E5%AF%B9%E8%B1%A1%E7%9A%84%E5%86%85%E5%AD%98%E5%88%86%E5%B8%83"><span class="nav-number">5.</span> <span class="nav-text">JAVA对象的内存分布</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#JVM%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6"><span class="nav-number">6.</span> <span class="nav-text">JVM垃圾回收机制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#JAVA%E5%B8%B8%E7%94%A8%E5%B7%A5%E5%85%B7"><span class="nav-number">7.</span> <span class="nav-text">JAVA常用工具</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#JVM%E5%90%AF%E5%8A%A8%E5%8F%82%E6%95%B0%E8%AF%B4%E6%98%8E"><span class="nav-number">8.</span> <span class="nav-text">JVM启动参数说明</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">LEEZY</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">37</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">LEEZY</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

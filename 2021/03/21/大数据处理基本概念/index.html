@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.leezy.top","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="大数据处理基本概念学习。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="大数据处理基本概念">
+<meta property="og:url" content="https://www.leezy.top/2021/03/21/%E5%A4%A7%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/index.html">
+<meta property="og:site_name" content="SAKURA">
+<meta property="og:description" content="大数据处理基本概念学习。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://www.leezy.top/assets/blogImg/big_data_lambda_structure.jpg">
+<meta property="og:image" content="https://www.leezy.top/assets/blogImg/big_data_kappa_structure.jpg">
+<meta property="og:image" content="https://www.leezy.top/assets/blogImg/hadoop_structure.png">
+<meta property="article:published_time" content="2021-03-20T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-11-30T09:45:03.867Z">
+<meta property="article:author" content="LEEZY">
+<meta property="article:tag" content="spark">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://www.leezy.top/assets/blogImg/big_data_lambda_structure.jpg">
+
+<link rel="canonical" href="https://www.leezy.top/2021/03/21/%E5%A4%A7%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>大数据处理基本概念 | SAKURA</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">SAKURA</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://www.leezy.top/2021/03/21/%E5%A4%A7%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="LEEZY">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="SAKURA">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          大数据处理基本概念
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-03-21 00:00:00" itemprop="dateCreated datePublished" datetime="2021-03-21T00:00:00+08:00">2021-03-21</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-11-30 17:45:03" itemprop="dateModified" datetime="2021-11-30T17:45:03+08:00">2021-11-30</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>大数据处理基本概念学习。</p>
+<span id="more"></span>
+
+<h3 id="基本定义"><a href="#基本定义" class="headerlink" title="基本定义"></a>基本定义</h3><h4 id="SLA"><a href="#SLA" class="headerlink" title="SLA"></a>SLA</h4><p>SLA（Service-Level Agreement），也就是服务等级协议，指的是系统服务提供者（Provider）对客户（Customer）的一个服务承诺。这是衡量一个大型分布式系统是否“健康”的常见方法。一种服务承诺最常见的四个指标，可用性、准确性、系统容量和延迟。</p>
+<ol>
+<li>可用性（Availabilty）可用性指的是系统服务能正常运行所占的时间百分比。</li>
+<li>准确性（Accuracy）导致系统产生内部错误（Internal Error）的有效请求数，除以这期间的有效请求总数。通常通过性能测试和查看系统日志的方式来评估。</li>
+<li>系统容量（Capacity）在数据处理中，系统容量通常指的是系统能够支持的预期负载量是多少，一般会以每秒的请求数为单位（QPS Queries Per Second）来表示。</li>
+<li>延迟（Latency）延迟指的是系统在收到用户的请求到响应这个请求之间的时间间隔。</li>
+</ol>
+<h4 id="批处理和流处理"><a href="#批处理和流处理" class="headerlink" title="批处理和流处理"></a>批处理和流处理</h4><p><code>无边界数据</code>是一种不断增长，可以说是无限的数据集,<code>有边界数据</code>是一种有限的数据集。<code>事件时间</code>指的是一个数据实际产生的时间点，而<code>处理时间</code>指的是处理数据的系统架构实际接收到这个数据的时间点。<br>绝大部分情况下，批处理的输入数据都是有边界数据，同样的，输出结果也一样是有边界数据。所以在批处理中，我们所关心的更多会是数据的事件时间。<br>批处理架构通常会被设计在以下这些应用场景中：</p>
+<ol>
+<li>日志分析：日志系统是在一定时间段（日，周或年）内收集的，而日志的数据处理分析是在不同的时间内执行，以得出有关系统的一些关键性能指标。</li>
+<li>计费应用程序：计费应用程序会计算出一段时间内一项服务的使用程度，并生成计费信息，例如银行在每个月末生成的信用卡还款单。</li>
+<li>数据仓库：数据仓库的主要目标是根据收集好的数据事件时间，将数据信息合并为静态快照 （static snapshot），并将它们聚合为每周、每月、每季度的报告等。</li>
+</ol>
+<p>流处理的输入数据基本上都是无边界数据。而流处理系统中是关心数据的事件时间还是处理时间，将视具体的应用场景而定。当流处理架构拥有在一定时间间隔（毫秒）内产生逻辑上正确的结果时，这种架构可以被定义为实时处理（Real-time Processing）。而如果一个系统架构可以接受以分钟为单位的数据处理时间延时，我们也可以把它定义为准实时处理（Near real-time Processing）。<br>流处理架构通常都会被设计在以下这些应用场景中：</p>
+<ol>
+<li>实时监控：捕获和分析各种来源发布的数据，如传感器，新闻源，点击网页等。</li>
+<li>实时商业智能：智能汽车，智能家居，智能病人护理等。</li>
+<li>销售终端（POS）系统：像是股票价格的更新，允许用户实时完成付款的系统等。</li>
+</ol>
+<h4 id="Workflow设计模式"><a href="#Workflow设计模式" class="headerlink" title="Workflow设计模式"></a>Workflow设计模式</h4><ul>
+<li><p>复制模式<br>复制模式通常是将单个数据处理模块中的数据，完整地复制到两个或更多的数据处理模块中，然后再由不同的数据处理模块进行处理。</p>
+</li>
+<li><p>过滤模式<br>过滤模式的作用是过滤掉不符合特定条件的数据。</p>
+</li>
+<li><p>分离模式<br>将数据分类为不同的类别来进行分组。</p>
+</li>
+<li><p>合并模式<br>合并模式会将多个不同的数据集转换集中到一起，成为一个总数据集，然后将这个总的数据集放在一个工作流中进行处理。</p>
+</li>
+</ul>
+<h4 id="发布订阅模式"><a href="#发布订阅模式" class="headerlink" title="发布订阅模式"></a>发布订阅模式</h4><p>如果你在处理数据的时候碰到以下场景，那么就可以考虑使用发布 / 订阅的数据处理模式。</p>
+<ol>
+<li><p>系统的发送方需要向大量的接收方广播消息。系统中某一个组件需要与多个独立开发的组件或服务进行通信，而这些独立开发的组件或服务可以使用不同的编程语言和通信协议。</p>
+</li>
+<li><p>系统的发送方在向接收方发送消息之后无需接收方进行实时响应。</p>
+</li>
+<li><p>系统中对数据一致性的要求只需要支持数据的最终一致性（Eventual Consistency）模型。</p>
+</li>
+</ol>
+<h4 id="分布式中的CAP定理"><a href="#分布式中的CAP定理" class="headerlink" title="分布式中的CAP定理"></a>分布式中的CAP定理</h4><p>在任意的分布式系统中，一致性（Consistency），可用性（Availability）和分区容错性（Partition-tolerance）这三种属性最多只能同时存在<code>两个</code>属性。</p>
+<ul>
+<li><p>C - 一致性：在线性一致性的保证下，所有分布式环境下的操作都像是在单机上完成的一样。</p>
+</li>
+<li><p>A - 可用性：在分布式系统中，任意非故障的服务器都必须对客户的请求产生响应。</p>
+</li>
+<li><p>P - 分区容错性：系统允许网络丢失从一个节点发送到另一个节点的任意多条消息。</p>
+</li>
+</ul>
+<p>常见的系统</p>
+<p>CP 系统：Google BigTable, Hbase, MongoDB, Redis, MemCacheDB，这些存储架构都是放弃了高可用性（High Availablity）而选择 CP 属性的。</p>
+<p>AP 系统：Amazon Dynamo 系统以及它的衍生存储系统 Apache Cassandra 和 Voldemort 都是属于 AP 系统</p>
+<p>CA 系统：Apache Kafka 是一个比较典型的 CA 系统。</p>
+<h4 id="Lambda架构"><a href="#Lambda架构" class="headerlink" title="Lambda架构"></a>Lambda架构</h4><p>Lambda 架构总共由三层系统组成：批处理层（Batch Layer），速度处理层（Speed Layer），以及用于响应查询的服务层（Serving Layer）</p>
+<p><img src="/assets/blogImg/big_data_lambda_structure.jpg" alt="Lambda 架构"></p>
+<p>批处理层存储管理主数据集（不可变的数据集）和预先批处理计算好的视图。批处理层使用可处理大量数据的分布式处理系统预先计算结果。它通过处理所有的已有历史数据来实现数据的准确性。这意味着它是基于完整的数据集来重新计算的，能够修复任何错误，然后更新现有的数据视图。输出通常存储在只读数据库中，更新则完全取代现有的预先计算好的视图。速度处理层会实时处理新来的大数据。速度层通过提供最新数据的实时视图来最小化延迟。速度层所生成的数据视图可能不如批处理层最终生成的视图那样准确或完整，但它们几乎在收到数据后立即可用。而当同样的数据在批处理层处理完成后，在速度层的数据就可以被替代掉了。</p>
+<p>一个查询，既通过批处理层兼顾了数据的完整性，也可以通过速度层弥补批处理层的高延时性，让整个查询具有实时性。</p>
+<p>例子：<br>1.批处理部分。定时拉取业务库的数据，并在hive做批处理计算。<br>2.速度部分。通过订阅mysql数据库的binlog，实时获取数据库的增删改等的操作，通过kafka和flink，生成相关结果。</p>
+<h4 id="kappa架构"><a href="#kappa架构" class="headerlink" title="kappa架构"></a>kappa架构</h4><p>与 Lambda 架构不同的是，Kappa 架构去掉了批处理层这一体系结构，而只保留了速度层。你只需要在业务逻辑改变又或者是代码更改的时候进行数据的重新处理。</p>
+<p><img src="/assets/blogImg/big_data_kappa_structure.jpg" alt="Lambda 架构"></p>
+<p>kappa架构使用更少的技术栈，实时和历史部分都是同一套技术栈。lambda架构为了解决历史部分和实时部分可能会使用不同的技术栈。<br>kappa架构使用了统一的处理逻辑。而lambda架构分别为历史和实时部分使用了两套逻辑。一旦需求变更，两套逻辑都要同时变更。<br>kappa架构具有流式处理的特点和优点。比如可以具有多个订阅者，比如具有更高的吞吐量。</p>
+<h3 id="MapReduce"><a href="#MapReduce" class="headerlink" title="MapReduce"></a>MapReduce</h3><p>MapReduce 通过简单的 Map 和 Reduce 的抽象提供了一个编程模型，可以在一个由上百台机器组成的集群上并发处理大量的数据集，而把计算细节隐藏起来。各种各样的复杂数据处理都可以分解为 Map 或 Reduce 的基本元素。复杂的数据处理可以分解为由多个 Job（包含一个 Mapper 和一个 Reducer）组成的有向无环图（DAG），然后每个 Mapper 和 Reducer 放到 Hadoop 集群上执行，就可以得出结果。</p>
+<p>MR的缺点：</p>
+<ol>
+<li><p>MapReduce 模型的抽象层次低，大量的底层逻辑都需要开发者手工完成。</p>
+</li>
+<li><p>只提供 Map 和 Reduce 两个操作。很多现实的数据处理场景并不适合用这个模型来描述。实现复杂的操作很有技巧性，也会让整个工程变得庞大以及难以维护。</p>
+</li>
+<li><p>在 Hadoop 中，每一个 Job 的计算结果都会存储在 HDFS 文件存储系统中，所以每一步计算都要进行硬盘的读取和写入，大大增加了系统的延迟。</p>
+</li>
+<li><p>只支持批数据处理，欠缺对流数据处理的支持。<br>MapReduce编程模型中，每一对map和reduce都会生成一个job，而且每一次都是写磁盘，这就造成启动时间变长，而且维护起来比较复杂；而Spark是链式计算，像map、flatmap、filter等transformation算子是不会触发计算的，只有在遇到像count、collect、saveAsTable等Action算子时，才会真正触发一次计算，对应会生成一个job。</p>
+</li>
+</ol>
+<h3 id="Spark"><a href="#Spark" class="headerlink" title="Spark"></a>Spark</h3><p>Spark 最基本的数据抽象叫作弹性分布式数据集（Resilient Distributed Dataset, RDD），它代表一个可以被分区（partition）的只读数据集，它内部可以有很多分区，每个分区又有大量的数据记录（record）。</p>
+<p>在任务（task）级别上，Spark 的并行机制是多线程模型，而 MapReduce 是多进程模型。</p>
+<p>MapReduce每次的MR结果都是保存到磁盘，所以时间开销大；而Spark在执行应用程序是，中间的处理过程、数据(RDD)的缓存和shuffle操作等都是在内存允许的情况下，放在内存中的，所以耗时短。</p>
+<p>Hadoop中常见组件分层</p>
+<p><img src="/assets/blogImg/hadoop_structure.png" alt="Hadoop中常见组件分层"></p>
+<h4 id="RDD-弹性分布式数据集"><a href="#RDD-弹性分布式数据集" class="headerlink" title="RDD - 弹性分布式数据集"></a>RDD - 弹性分布式数据集</h4><p>RDD 表示已被分区、不可变的，并能够被并行操作的数据集合。</p>
+<ul>
+<li><p>分区：类似kafka的Topic，RDD由分区组成，本身只是一个逻辑概念，RDD 中的每个分区存有它在该 RDD 中的 index。通过 RDD 的 ID 和分区的 index 可以唯一确定对应数据块的编号，从而通过底层存储层的接口中提取到数据进行处理。在集群中，各个节点上的数据块会尽可能地存放在内存中，只有当内存没有空间时才会存入硬盘。这样可以最大化地减少硬盘读写的开销。</p>
+</li>
+<li><p>只读：只可以对现有的 RDD 进行转换（Transformation）操作生成新的RDD</p>
+</li>
+<li><p>并行：由于单个 RDD 的分区特性，使得它天然支持并行操作，即不同节点上的数据可以被分别处理，然后产生一个新的 RDD。</p>
+</li>
+</ul>
+<p>RDD的结构：</p>
+<ul>
+<li>Spark Context + Saprk Conf</li>
+</ul>
+<p>SparkContext 是所有 Spark 功能的入口，它代表了与 Spark 节点的连接，可以用来创建 RDD 对象以及在节点中的广播变量等。一个线程只有一个 SparkContext。SparkConf 则是一些参数配置信息。</p>
+<ul>
+<li><p>Partitions 和 partitioner：Partitions代表 RDD 中数据的逻辑结构，每个 Partition 会映射到某个节点内存或硬盘的一个数据块。目前有两种主流的分区方式：Hash partitioner 和 Range partitioner。Hash，顾名思义就是对数据的 Key 进行散列分区，Range 则是按照 Key 的排序进行均匀分区。此外我们还可以创建自定义的 Partitioner</p>
+</li>
+<li><p>依赖关系： Spark 支持两种依赖关系：窄依赖（Narrow Dependency）和宽依赖（Wide Dependency）。</p>
+</li>
+</ul>
+<ol>
+<li><p>窄依赖：父 RDD 的分区可以一一对应到子 RDD 的分区，一子多父，一子一父都是窄依赖</p>
+</li>
+<li><p>宽依赖：宽依赖就是父 RDD 的每个分区可以被多个子 RDD 的分区使用。即一父多子；</p>
+</li>
+</ol>
+<p>Spark 之所以要区分宽依赖和窄依赖是出于以下两点考虑：</p>
+<ol>
+<li><p>窄依赖可以支持在同一个节点上链式执行多条命令，例如在执行了 map 后，紧接着执行 filter。相反，宽依赖需要所有的父分区都是可用的，可能还需要调用类似 MapReduce 之类的操作进行跨节点传递。</p>
+</li>
+<li><p>从失败恢复的角度考虑，窄依赖的失败恢复更容易，因为它只需要重新计算丢失的父分区即可，而宽依赖牵涉到 RDD 各级的多个父分区。</p>
+</li>
+</ol>
+<ul>
+<li><p>Checkpoint: 在计算过程中，对于一些计算过程比较耗时的 RDD，我们可以将它缓存至硬盘或 HDFS 中，标记这个 RDD 有被检查点处理过，并且<code>清空</code>它的所有依赖关系。同时，给它新建一个依赖于 CheckpointRDD 的依赖关系，CheckpointRDD 可以用来从硬盘中读取 RDD 和生成新的分区信息。这样，当某个子 RDD 需要错误恢复时，回溯至该 RDD，发现它被检查点记录过，就可以直接去硬盘中读取这个 RDD，而无需再向前回溯计算。</p>
+</li>
+<li><p>Storage Level 存储级别：一个枚举类型，用来记录 RDD 持久化时的存储级别，常用的有以下几个：</p>
+</li>
+</ul>
+<ol>
+<li><p>MEMORY_ONLY：只缓存在内存中，如果内存空间不够则不缓存多出来的部分。这是 RDD 存储级别的默认值。</p>
+</li>
+<li><p>MEMORY_AND_DISK：缓存在内存中，如果空间不够则缓存在硬盘中。</p>
+</li>
+<li><p>DISK_ONLY：只缓存在硬盘中。</p>
+</li>
+<li><p>MEMORY_ONLY_2 和 MEMORY_AND_DISK_2 等：与上面的级别功能相同，只不过每个分区在集群中两个节点上建立副本。</p>
+</li>
+</ol>
+<ul>
+<li>迭代函数（Iterator）和计算函数（Compute）: 用来表示 RDD 怎样通过父 RDD 计算得到的。迭代函数会首先判断缓存中是否有想要计算的 RDD，如果有就直接读取，如果没有，就查找想要计算的 RDD 是否被检查点处理过。如果有，就直接读取，如果没有，就调用计算函数向上递归，查找父 RDD 进行计算。</li>
+</ul>
+<h5 id="RDD-的操作"><a href="#RDD-的操作" class="headerlink" title="RDD 的操作"></a>RDD 的操作</h5><p>RDD 的数据操作分为两种：转换（Transformation）和动作（Action）。</p>
+<ol>
+<li>转换，转换操作都很懒，它只是生成新的 RDD，并且记录依赖关系。Spark 并不会立刻计算出新 RDD 中各个分区的数值。直到遇到一个动作时，数据才会被计算，并且输出结果给 Driver。这样设计的目的是，当动作比较简单时，可以很快的就返回。</li>
+</ol>
+<p>Map/Filter/mapPartitions/groupByKey</p>
+<ol start="2">
+<li>动作</li>
+</ol>
+<p>Collect/Reduce/Count/CountByKey</p>
+<h5 id="RDD-的持久化（缓存）"><a href="#RDD-的持久化（缓存）" class="headerlink" title="RDD 的持久化（缓存）"></a>RDD 的持久化（缓存）</h5><p>Spark 的 persist() 和 cache() 方法支持将 RDD 的数据缓存至内存或硬盘中，在缓存 RDD 的时候，它所有的依赖关系也会被一并存下来。所以持久化的 RDD 有自动的容错机制。如果 RDD 的任一分区丢失了，通过使用原先创建它的转换操作，它将会被自动重算。持久化可以选择不同的存储级，见上文。</p>
+<h5 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h5><p>Spark 在每次转换操作的时候使用了新产生的 RDD 来记录计算逻辑，这样就把作用在 RDD 上的所有计算逻辑串起来形成了一个链条，但是并不会真的去计算结果。当对 RDD 进行动作 Action 时，Spark 会从计算链的最后一个 RDD 开始，利用迭代函数（Iterator）和计算函数（Compute），依次从上一个 RDD 获取数据并执行计算逻辑，最后输出结果。</p>
+<h4 id="Spark-SQL"><a href="#Spark-SQL" class="headerlink" title="Spark SQL"></a>Spark SQL</h4><p>基于批处理模式对静态数据进行处理，Spark提供了类似于 SQL 的操作接口，允许数据仓库应用程序直接获取数据，允许使用者通过命令行操作来交互地查询数据，还提供两个 API：DataFrame API 和 DataSet API。</p>
+<ul>
+<li><p>DataSet: DataSet 存储了每列的名称以及数据类型。DataSet 支持的转换和动作也和 RDD 类似，比如 map、filter、select、count、show 及把数据写入文件系统中。同样地，DataSet 上的转换操作也不会被立刻执行，只是先生成新的 DataSet，只有当遇到动作操作，才会把之前的转换操作一并执行，生成结果。</p>
+</li>
+<li><p>DataFrame: DataFrame 每一行的类型固定为 Row，他可以被当作 DataSet[Row]来处理，必须要通过解析才能获取各列的值。在Spark 2.0中DataFrame被统一为DataSet[Row]</p>
+</li>
+</ul>
+<p>简单来说，当每列数据类型程序都很确定时用<code>DataSet</code>, 列的类型不确定时，使用<code>DataFrame</code>，当使用非结构化的数据时，例如<code>文本流数据</code>，使用RDD比较合适。DataFrame 和 DataSet 的性能要比 RDD 更好，Spark SQL 中的Catalyst查询优化器会对语句进行分析，并生成优化过的 RDD 在底层执行。</p>
+<h4 id="Spark-Streaming"><a href="#Spark-Streaming" class="headerlink" title="Spark Streaming"></a>Spark Streaming</h4><p>Spark Streaming针对流数据的特性，根据时间片，将流数据拆分为无限的数据流，类似于微积分，然后对每一个数据片用批处理的方法进行处理。在内部，每个数据块就是一个 RDD，所以 Spark Streaming 有 RDD 的所有优点，处理速度快，数据容错性好，支持高度并行计算。但是，它的实时延迟相比起别的流处理框架比较高。在实际工作中，我们还是要具体情况具体分析，选择正确的处理框架。思考题</p>
+<ul>
+<li><p>DStream: Spark Streaming 提供一个对于流数据的抽象 DStream，DStream 可以由来自 Apache Kafka、Flume 或者 HDFS 的流数据生成，也可以由别的 DStream 经过各种转换操作得来。</p>
+</li>
+<li><p>滑动窗口操作: StreamingContext 中最重要的参数是批处理的时间间隔，即把流数据细分成数据块的粒度。Window操作的两大特性是：<code>窗口长度</code>和<code>滑动间隔</code>，它可以返回一个新的 DStream，这个 DStream 中每个 RDD 代表一段时间窗口内的数据。</p>
+</li>
+</ul>
+<h4 id="Structured-Streaming"><a href="#Structured-Streaming" class="headerlink" title="Structured Streaming"></a>Structured Streaming</h4><p>一个建立在Spark SQL引擎之上可扩展且容错的流处理引擎。你可以使用与静态数据批处理计算相同的方式来表达流计算。当不断有流数据到达时，Spark SQL引擎将会增量地、连续地计算它们，然后更新最终的结果。<br>Structured Streaming 的三种输出模式。</p>
+<ol>
+<li>完全模式（Complete Mode）：整个更新过的输出表都被写入外部存储；</li>
+<li>附加模式（Append Mode）：上一次触发之后新增加的行才会被写入外部存储。如果老数据有改动则不适合这个模式；</li>
+<li>更新模式（Update Mode）：上一次触发之后被更新的行才会被写入外部存储。<br>Structured Streaming 并不会完全存储输入数据。每个时间间隔它都会读取最新的输入，进行处理，更新输出表，然后把这次的输入删除。Structured Streaming 只会存储更新输出表所需要的信息。在 Structured Streaming 发布以后，<code>DataFrame</code> 既可以代表静态的有边界数据，也可以代表无边界数据。</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/spark/" rel="tag"># spark</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/03/01/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/" rel="prev" title="消息中间件学习">
+      <i class="fa fa-chevron-left"></i> 消息中间件学习
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/10/29/Jetty%E9%97%AE%E9%A2%98%E5%88%86%E6%9E%90/" rel="next" title="Jetty问题分析">
+      Jetty问题分析 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E5%AE%9A%E4%B9%89"><span class="nav-number">1.</span> <span class="nav-text">基本定义</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#SLA"><span class="nav-number">1.1.</span> <span class="nav-text">SLA</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%89%B9%E5%A4%84%E7%90%86%E5%92%8C%E6%B5%81%E5%A4%84%E7%90%86"><span class="nav-number">1.2.</span> <span class="nav-text">批处理和流处理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Workflow%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F"><span class="nav-number">1.3.</span> <span class="nav-text">Workflow设计模式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8F%91%E5%B8%83%E8%AE%A2%E9%98%85%E6%A8%A1%E5%BC%8F"><span class="nav-number">1.4.</span> <span class="nav-text">发布订阅模式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%86%E5%B8%83%E5%BC%8F%E4%B8%AD%E7%9A%84CAP%E5%AE%9A%E7%90%86"><span class="nav-number">1.5.</span> <span class="nav-text">分布式中的CAP定理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Lambda%E6%9E%B6%E6%9E%84"><span class="nav-number">1.6.</span> <span class="nav-text">Lambda架构</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#kappa%E6%9E%B6%E6%9E%84"><span class="nav-number">1.7.</span> <span class="nav-text">kappa架构</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MapReduce"><span class="nav-number">2.</span> <span class="nav-text">MapReduce</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Spark"><span class="nav-number">3.</span> <span class="nav-text">Spark</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#RDD-%E5%BC%B9%E6%80%A7%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E9%9B%86"><span class="nav-number">3.1.</span> <span class="nav-text">RDD - 弹性分布式数据集</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#RDD-%E7%9A%84%E6%93%8D%E4%BD%9C"><span class="nav-number">3.1.1.</span> <span class="nav-text">RDD 的操作</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#RDD-%E7%9A%84%E6%8C%81%E4%B9%85%E5%8C%96%EF%BC%88%E7%BC%93%E5%AD%98%EF%BC%89"><span class="nav-number">3.1.2.</span> <span class="nav-text">RDD 的持久化（缓存）</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">3.1.3.</span> <span class="nav-text">总结</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Spark-SQL"><span class="nav-number">3.2.</span> <span class="nav-text">Spark SQL</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Spark-Streaming"><span class="nav-number">3.3.</span> <span class="nav-text">Spark Streaming</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Structured-Streaming"><span class="nav-number">3.4.</span> <span class="nav-text">Structured Streaming</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">LEEZY</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">37</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">LEEZY</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

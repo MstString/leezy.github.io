@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.leezy.top","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="JAVA基础知识-HashMap 相关知识。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JAVA基础知识-HashMap">
+<meta property="og:url" content="https://www.leezy.top/2019/09/05/JAVA%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86-HashMap/index.html">
+<meta property="og:site_name" content="SAKURA">
+<meta property="og:description" content="JAVA基础知识-HashMap 相关知识。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2019-09-05T03:06:00.000Z">
+<meta property="article:modified_time" content="2021-11-30T09:45:03.862Z">
+<meta property="article:author" content="LEEZY">
+<meta property="article:tag" content="Java">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://www.leezy.top/2019/09/05/JAVA%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86-HashMap/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>JAVA基础知识-HashMap | SAKURA</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">SAKURA</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://www.leezy.top/2019/09/05/JAVA%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86-HashMap/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="LEEZY">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="SAKURA">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          JAVA基础知识-HashMap
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-09-05 11:06:00" itemprop="dateCreated datePublished" datetime="2019-09-05T11:06:00+08:00">2019-09-05</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-11-30 17:45:03" itemprop="dateModified" datetime="2021-11-30T17:45:03+08:00">2021-11-30</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>JAVA基础知识-HashMap 相关知识。</p>
+<span id="more"></span>
+<h3 id="常用的通配符"><a href="#常用的通配符" class="headerlink" title="常用的通配符"></a>常用的通配符</h3><p><strong>T</strong>, <strong>E</strong>, <strong>K</strong>, <strong>V</strong>, <strong>?</strong></p>
+<p>本质上没有任何区别，但是为了维持可读性，常这样约定：</p>
+<p>？表示不确定的JAVA类型</p>
+<p>T (type) 表示一个具体的JAVA类型</p>
+<p>K V (key value) 分别表示JAVA键值对 key - value</p>
+<p>E (element) 代表Element</p>
+<h3 id="RBT-红黑树"><a href="#RBT-红黑树" class="headerlink" title="RBT(红黑树)"></a>RBT(红黑树)</h3><ul>
+<li>每个节点是红色或者黑色</li>
+<li>根节点是黑色</li>
+<li>每个叶节点是黑色的</li>
+<li>如果一个节点是红色的，则它的两个儿子都是黑色的</li>
+<li>对于每个节点，从该结点到其叶子节点构成的所有路径上的黑色结点个数相同</li>
+</ul>
+<p><strong>插入过程：</strong></p>
+<p>默认插入节点为红色</p>
+<h3 id="AVL-自平衡二叉查找树"><a href="#AVL-自平衡二叉查找树" class="headerlink" title="AVL(自平衡二叉查找树)"></a>AVL(自平衡二叉查找树)</h3><ul>
+<li><p>首先是一棵二叉查找树</p>
+<p><em>某节点的左子树节点值仅包含小于该节点值</em></p>
+<p><em>某节点的右子树节点值仅包含大于该节点值</em></p>
+<p><em>左右子树每个也必须是二叉查找树</em></p>
+</li>
+<li><p>带有平衡条件，每个结点的左右子树的高度之差的绝对值（平衡因子）最多为1</p>
+</li>
+</ul>
+<h3 id="RBT和AVL"><a href="#RBT和AVL" class="headerlink" title="RBT和AVL"></a>RBT和AVL</h3><p>查找远远多于插入删除，选择AVL树</p>
+<p>如果查找、插入、删除频率差不多，那么选择红黑树</p>
+<h3 id="JAVA-中红黑树的实现"><a href="#JAVA-中红黑树的实现" class="headerlink" title="JAVA 中红黑树的实现"></a>JAVA 中红黑树的实现</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">TreeNode</span>&lt;<span class="title">K</span>,<span class="title">V</span>&gt; <span class="keyword">extends</span> <span class="title">LinkedHashMap</span>.<span class="title">Entry</span>&lt;<span class="title">K</span>,<span class="title">V</span>&gt; </span>&#123;</span><br><span class="line">        TreeNode&lt;K,V&gt; parent;  <span class="comment">// red-black tree links</span></span><br><span class="line">        TreeNode&lt;K,V&gt; left;</span><br><span class="line">        TreeNode&lt;K,V&gt; right;</span><br><span class="line">        TreeNode&lt;K,V&gt; prev;    <span class="comment">// needed to unlink next upon deletion</span></span><br><span class="line">        <span class="keyword">boolean</span> red;</span><br><span class="line">        TreeNode(<span class="keyword">int</span> hash, K key, V val, Node&lt;K,V&gt; next) &#123;</span><br><span class="line">            <span class="keyword">super</span>(hash, key, val, next);</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>红黑树的插入过程：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> &lt;K,V&gt; <span class="function">TreeNode&lt;K,V&gt; <span class="title">balanceInsertion</span><span class="params">(TreeNode&lt;K,V&gt; root, TreeNode&lt;K,V&gt; x)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 初始染色为红</span></span><br><span class="line">    x.red = <span class="keyword">true</span>;</span><br><span class="line">    <span class="keyword">for</span> (TreeNode&lt;K,V&gt; xp, xpp, xppl, xppr;;) &#123;</span><br><span class="line">        <span class="comment">// 插入的为根节点（父节点为空），则直接把颜色改为黑色</span></span><br><span class="line">        <span class="keyword">if</span> ((xp = x.parent) == <span class="keyword">null</span>) &#123;</span><br><span class="line">            x.red = <span class="keyword">false</span>;</span><br><span class="line">            <span class="keyword">return</span> x;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 父节点为黑色节点或者插入节点的祖父节点为空，则直接返回</span></span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (!xp.red || (xpp = xp.parent) == <span class="keyword">null</span>)</span><br><span class="line">            <span class="keyword">return</span> root;</span><br><span class="line">        <span class="comment">// I. 父节点和祖父节点都存在且父节点是祖父节点的左节点</span></span><br><span class="line">        <span class="keyword">if</span> (xp == (xppl = xpp.left)) &#123;</span><br><span class="line">            <span class="comment">// 1. 祖父节点的右节点（叔叔节点）不是空且为红色</span></span><br><span class="line">            <span class="keyword">if</span> ((xppr = xpp.right) != <span class="keyword">null</span> &amp;&amp; xppr.red) &#123;</span><br><span class="line">                <span class="comment">// 将叔叔节点改为黑色</span></span><br><span class="line">                xppr.red = <span class="keyword">false</span>;</span><br><span class="line">                <span class="comment">// 将父亲节点改为黑色</span></span><br><span class="line">                xp.red = <span class="keyword">false</span>;</span><br><span class="line">                <span class="comment">// 将祖父节点改为红色</span></span><br><span class="line">                xpp.red = <span class="keyword">true</span>;</span><br><span class="line">                x = xpp;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// 2. 祖父节点的右节点（叔叔节点）是空或者为黑色</span></span><br><span class="line">            <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="comment">// 插入节点是父节点的右孩子，将父节点左旋</span></span><br><span class="line">                <span class="keyword">if</span> (x == xp.right) &#123;</span><br><span class="line">                    root = rotateLeft(root, x = xp);</span><br><span class="line">                    xpp = (xp = x.parent) == <span class="keyword">null</span> ? <span class="keyword">null</span> : xp.parent;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="comment">// 插入节点是父节点的左孩子</span></span><br><span class="line">                <span class="keyword">if</span> (xp != <span class="keyword">null</span>) &#123;</span><br><span class="line">                    <span class="comment">// 将父节点变成黑色节点</span></span><br><span class="line">                    xp.red = <span class="keyword">false</span>;</span><br><span class="line">                    <span class="keyword">if</span> (xpp != <span class="keyword">null</span>) &#123;</span><br><span class="line">                        <span class="comment">// 祖父节点变成红色节点，然后将祖父节点右旋</span></span><br><span class="line">                        xpp.red = <span class="keyword">true</span>;</span><br><span class="line">                        root = rotateRight(root, xpp);</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// II. 父节点和祖父节点都存在且父节点是祖父节点的右节点</span></span><br><span class="line">        <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="comment">// 1. 祖父节点的左节点（叔叔节点）不为空且为红色</span></span><br><span class="line">            <span class="keyword">if</span> (xppl != <span class="keyword">null</span> &amp;&amp; xppl.red) &#123;</span><br><span class="line">                <span class="comment">// 将叔叔节点改为黑色</span></span><br><span class="line">                xppl.red = <span class="keyword">false</span>;</span><br><span class="line">                <span class="comment">// 将父亲节点改为黑色</span></span><br><span class="line">                xp.red = <span class="keyword">false</span>;</span><br><span class="line">                <span class="comment">// 将祖父节点改为红色</span></span><br><span class="line">                xpp.red = <span class="keyword">true</span>;</span><br><span class="line">                x = xpp;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// 2. 祖父节点的左节点（叔叔节点）是空或者为黑色</span></span><br><span class="line">            <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="comment">// 插入节点是父节点的左孩子，将父节点右旋</span></span><br><span class="line">                <span class="keyword">if</span> (x == xp.left) &#123;</span><br><span class="line">                    root = rotateRight(root, x = xp);</span><br><span class="line">                    xpp = (xp = x.parent) == <span class="keyword">null</span> ? <span class="keyword">null</span> : xp.parent;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="comment">// 插入节点是父节点的右孩子</span></span><br><span class="line">                <span class="keyword">if</span> (xp != <span class="keyword">null</span>) &#123;</span><br><span class="line">                    <span class="comment">// 将父节点变成黑色节点</span></span><br><span class="line">                    xp.red = <span class="keyword">false</span>;</span><br><span class="line">                    <span class="keyword">if</span> (xpp != <span class="keyword">null</span>) &#123;</span><br><span class="line">                        <span class="comment">// 祖父节点变成红色节点，然后将祖父节点左旋</span></span><br><span class="line">                        xpp.red = <span class="keyword">true</span>;</span><br><span class="line">                        root = rotateLeft(root, xpp);</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>左旋右旋方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> &lt;K,V&gt; <span class="function">TreeNode&lt;K,V&gt; <span class="title">rotateLeft</span><span class="params">(TreeNode&lt;K,V&gt; root, TreeNode&lt;K,V&gt; p)</span> </span>&#123;</span><br><span class="line">    TreeNode&lt;K,V&gt; r, pp, rl;</span><br><span class="line">    <span class="keyword">if</span> (p != <span class="keyword">null</span> &amp;&amp; (r = p.right) != <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="keyword">if</span> ((rl = p.right = r.left) != <span class="keyword">null</span>)</span><br><span class="line">            rl.parent = p;</span><br><span class="line">        <span class="keyword">if</span> ((pp = r.parent = p.parent) == <span class="keyword">null</span>)</span><br><span class="line">            (root = r).red = <span class="keyword">false</span>;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (pp.left == p)</span><br><span class="line">            pp.left = r;</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">            pp.right = r;</span><br><span class="line">        r.left = p;</span><br><span class="line">        p.parent = r;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> root;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span> &lt;K,V&gt; <span class="function">TreeNode&lt;K,V&gt; <span class="title">rotateRight</span><span class="params">(TreeNode&lt;K,V&gt; root, TreeNode&lt;K,V&gt; p)</span> </span>&#123;</span><br><span class="line">    TreeNode&lt;K,V&gt; l, pp, lr;</span><br><span class="line">    <span class="keyword">if</span> (p != <span class="keyword">null</span> &amp;&amp; (l = p.left) != <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="keyword">if</span> ((lr = p.left = l.right) != <span class="keyword">null</span>)</span><br><span class="line">            lr.parent = p;</span><br><span class="line">        <span class="keyword">if</span> ((pp = l.parent = p.parent) == <span class="keyword">null</span>)</span><br><span class="line">            (root = l).red = <span class="keyword">false</span>;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (pp.right == p)</span><br><span class="line">            pp.right = l;</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">            pp.left = l;</span><br><span class="line">        l.right = p;</span><br><span class="line">        p.parent = l;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> root;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>红黑树的删除过程：</p>
+<ol>
+<li>先进行二叉搜索树的删除</li>
+<li>然后进行红黑树的调整</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// p是待删除节点，replacement用于后续的红黑树调整，指向的是p或者p的继承者。</span></span><br><span class="line"><span class="keyword">if</span> (pl != <span class="keyword">null</span> &amp;&amp; pr != <span class="keyword">null</span>) &#123;</span><br><span class="line">    TreeNode&lt;K,V&gt; s = pr, sl;</span><br><span class="line">    <span class="keyword">while</span> ((sl = s.left) != <span class="keyword">null</span>) <span class="comment">// find successor</span></span><br><span class="line">        s = sl;</span><br><span class="line">    <span class="keyword">boolean</span> c = s.red; s.red = p.red; p.red = c; <span class="comment">// swap colors</span></span><br><span class="line">    TreeNode&lt;K,V&gt; sr = s.right;</span><br><span class="line">    TreeNode&lt;K,V&gt; pp = p.parent;</span><br><span class="line">    <span class="keyword">if</span> (s == pr) &#123; <span class="comment">// p was s&#x27;s direct parent</span></span><br><span class="line">        p.parent = s;</span><br><span class="line">        s.right = p;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> &#123;</span><br><span class="line">        TreeNode&lt;K,V&gt; sp = s.parent;</span><br><span class="line">        <span class="keyword">if</span> ((p.parent = sp) != <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">if</span> (s == sp.left)</span><br><span class="line">                sp.left = p;</span><br><span class="line">            <span class="keyword">else</span></span><br><span class="line">                sp.right = p;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> ((s.right = pr) != <span class="keyword">null</span>)</span><br><span class="line">            pr.parent = s;</span><br><span class="line">    &#125;</span><br><span class="line">    p.left = <span class="keyword">null</span>;</span><br><span class="line">    <span class="keyword">if</span> ((p.right = sr) != <span class="keyword">null</span>)</span><br><span class="line">        sr.parent = p;</span><br><span class="line">    <span class="keyword">if</span> ((s.left = pl) != <span class="keyword">null</span>)</span><br><span class="line">        pl.parent = s;</span><br><span class="line">    <span class="keyword">if</span> ((s.parent = pp) == <span class="keyword">null</span>)</span><br><span class="line">        root = s;</span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (p == pp.left)</span><br><span class="line">        pp.left = s;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        pp.right = s;</span><br><span class="line">    <span class="keyword">if</span> (sr != <span class="keyword">null</span>)</span><br><span class="line">        replacement = sr;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        replacement = p;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">else</span> <span class="keyword">if</span> (pl != <span class="keyword">null</span>)</span><br><span class="line">    replacement = pl;</span><br><span class="line"><span class="keyword">else</span> <span class="keyword">if</span> (pr != <span class="keyword">null</span>)</span><br><span class="line">    replacement = pr;</span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">    replacement = p;</span><br><span class="line"><span class="keyword">if</span> (replacement != p) &#123;</span><br><span class="line">    TreeNode&lt;K,V&gt; pp = replacement.parent = p.parent;</span><br><span class="line">    <span class="keyword">if</span> (pp == <span class="keyword">null</span>)</span><br><span class="line">        root = replacement;</span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (p == pp.left)</span><br><span class="line">        pp.left = replacement;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        pp.right = replacement;</span><br><span class="line">    p.left = p.right = p.parent = <span class="keyword">null</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 如果删除时的节点p是红色，则树平衡不会被破坏，无需调整。 </span></span><br><span class="line">TreeNode&lt;K,V&gt; r = p.red ? root : balanceDeletion(root, replacement);</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (replacement == p) &#123;  <span class="comment">// detach</span></span><br><span class="line">    TreeNode&lt;K,V&gt; pp = p.parent;</span><br><span class="line">    p.parent = <span class="keyword">null</span>;</span><br><span class="line">    <span class="keyword">if</span> (pp != <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="keyword">if</span> (p == pp.left)</span><br><span class="line">            pp.left = <span class="keyword">null</span>;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (p == pp.right)</span><br><span class="line">            pp.right = <span class="keyword">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span> (movable)</span><br><span class="line">    moveRootToFront(tab, r);</span><br></pre></td></tr></table></figure>
+
+<p>删除后的调整</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// root : 根节点 | x : 根节点的继承者</span></span><br><span class="line"><span class="keyword">static</span> &lt;K,V&gt; <span class="function">TreeNode&lt;K,V&gt; <span class="title">balanceDeletion</span><span class="params">(TreeNode&lt;K,V&gt; root, TreeNode&lt;K,V&gt; x)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">for</span> (TreeNode&lt;K,V&gt; xp, xpl, xpr;;) &#123;</span><br><span class="line">        <span class="comment">// 如果x为空或x为根节点，直接返回</span></span><br><span class="line">        <span class="keyword">if</span> (x == <span class="keyword">null</span> || x == root)</span><br><span class="line">            <span class="keyword">return</span> root;</span><br><span class="line">        <span class="comment">// x为根节点，染成黑色，直接返回(删除的为根节点，则扶植继承者x为新的根节点)</span></span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> ((xp = x.parent) == <span class="keyword">null</span>) &#123;</span><br><span class="line">            x.red = <span class="keyword">false</span>;</span><br><span class="line">            <span class="keyword">return</span> x;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// x为红色，则无需调整，直接返回根节点</span></span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (x.red) &#123;</span><br><span class="line">            x.red = <span class="keyword">false</span>;</span><br><span class="line">            <span class="keyword">return</span> root;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// x为其父节点的左孩子</span></span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> ((xpl = xp.left) == x) &#123;</span><br><span class="line">            <span class="comment">// 如果x有红色兄弟节点xpr, 则它的父节点xp一定是黑色节点</span></span><br><span class="line">            <span class="keyword">if</span> ((xpr = xp.right) != <span class="keyword">null</span> &amp;&amp; xpr.red) &#123;</span><br><span class="line">                xpr.red = <span class="keyword">false</span>;</span><br><span class="line">                xp.red = <span class="keyword">true</span>;</span><br><span class="line">                <span class="comment">// 将父节点左旋</span></span><br><span class="line">                root = rotateLeft(root, xp);</span><br><span class="line">                <span class="comment">// 重新将xp指向x的父节点，xpr指向xp新的右孩子</span></span><br><span class="line">                xpr = (xp = x.parent) == <span class="keyword">null</span> ? <span class="keyword">null</span> : xp.right;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">//如果xpr为空，则向上继续调整，将x的父节点xp作为新的x继续循环</span></span><br><span class="line">            <span class="keyword">if</span> (xpr == <span class="keyword">null</span>)</span><br><span class="line">                x = xp;</span><br><span class="line">            <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="comment">// sl和sr分别为其近侄子和远侄子</span></span><br><span class="line">                TreeNode&lt;K,V&gt; sl = xpr.left, sr = xpr.right;</span><br><span class="line">                <span class="comment">// 若s1和s2都为黑色或者不存在，即xpr没有红色孩子，则将xpr染红</span></span><br><span class="line">                <span class="keyword">if</span> ((sr == <span class="keyword">null</span> || !sr.red) &amp;&amp; (sl == <span class="keyword">null</span> || !sl.red)) &#123;</span><br><span class="line">                    xpr.red = <span class="keyword">true</span>;</span><br><span class="line">                    <span class="comment">// 继续向上循环</span></span><br><span class="line">                    x = xp;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">else</span> &#123;</span><br><span class="line">                    <span class="comment">// 右孩子为空或者为黑色</span></span><br><span class="line">                    <span class="keyword">if</span> (sr == <span class="keyword">null</span> || !sr.red) &#123;</span><br><span class="line">                        <span class="comment">// 有左孩子则染黑</span></span><br><span class="line">                        <span class="keyword">if</span> (sl != <span class="keyword">null</span>)</span><br><span class="line">                            sl.red = <span class="keyword">false</span>;</span><br><span class="line">                        <span class="comment">// 将xpr染红</span></span><br><span class="line">                        xpr.red = <span class="keyword">true</span>;</span><br><span class="line">                        <span class="comment">// xpr右旋</span></span><br><span class="line">                        root = rotateRight(root, xpr);</span><br><span class="line">                        <span class="comment">// 右旋后xpr指向xp的新右孩子，即上面的s1</span></span><br><span class="line">                        xpr = (xp = x.parent) == <span class="keyword">null</span> ?</span><br><span class="line">                            <span class="keyword">null</span> : xp.right;</span><br><span class="line">                    &#125;</span><br><span class="line">                    <span class="keyword">if</span> (xpr != <span class="keyword">null</span>) &#123;</span><br><span class="line">                        <span class="comment">// xpr染成跟父节点一致的颜色，为后面父节点xp的左旋做准备</span></span><br><span class="line">                        <span class="keyword">if</span> ((sr = xpr.right) != <span class="keyword">null</span>)</span><br><span class="line">                        xpr.red = (xp == <span class="keyword">null</span>) ? <span class="keyword">false</span> : xp.red;</span><br><span class="line">                        <span class="keyword">if</span> ((sr = xpr.right) != <span class="keyword">null</span>)</span><br><span class="line">                            <span class="comment">// xpr新的右孩子染黑，防止出现两个红色相连</span></span><br><span class="line">                            sr.red = <span class="keyword">false</span>;</span><br><span class="line">                    &#125;</span><br><span class="line">                    <span class="keyword">if</span> (xp != <span class="keyword">null</span>) &#123;</span><br><span class="line">                        <span class="comment">// 将xp染黑，并对其左旋，这样就能保证被删除的X所在的路径又多了一个黑色节点，从而达到恢复平衡的目的</span></span><br><span class="line">                        xp.red = <span class="keyword">false</span>;</span><br><span class="line">                        root = rotateLeft(root, xp);</span><br><span class="line">                    &#125;</span><br><span class="line">                    <span class="comment">// 到此调整已经完毕，进入下一次循环后将直接退出</span></span><br><span class="line">                    x = root;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// x为其父节点的右孩子...</span></span><br><span class="line">        <span class="keyword">else</span> &#123; <span class="comment">// symmetric</span></span><br><span class="line">            <span class="keyword">if</span> (xpl != <span class="keyword">null</span> &amp;&amp; xpl.red) &#123;</span><br><span class="line">                xpl.red = <span class="keyword">false</span>;</span><br><span class="line">                xp.red = <span class="keyword">true</span>;</span><br><span class="line">                root = rotateRight(root, xp);</span><br><span class="line">                xpl = (xp = x.parent) == <span class="keyword">null</span> ? <span class="keyword">null</span> : xp.left;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span> (xpl == <span class="keyword">null</span>)</span><br><span class="line">                x = xp;</span><br><span class="line">            <span class="keyword">else</span> &#123;</span><br><span class="line">                TreeNode&lt;K,V&gt; sl = xpl.left, sr = xpl.right;</span><br><span class="line">                <span class="keyword">if</span> ((sl == <span class="keyword">null</span> || !sl.red) &amp;&amp;</span><br><span class="line">                    (sr == <span class="keyword">null</span> || !sr.red)) &#123;</span><br><span class="line">                    xpl.red = <span class="keyword">true</span>;</span><br><span class="line">                    x = xp;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">else</span> &#123;</span><br><span class="line">                    <span class="keyword">if</span> (sl == <span class="keyword">null</span> || !sl.red) &#123;</span><br><span class="line">                        <span class="keyword">if</span> (sr != <span class="keyword">null</span>)</span><br><span class="line">                            sr.red = <span class="keyword">false</span>;</span><br><span class="line">                        xpl.red = <span class="keyword">true</span>;</span><br><span class="line">                        root = rotateLeft(root, xpl);</span><br><span class="line">                        xpl = (xp = x.parent) == <span class="keyword">null</span> ?</span><br><span class="line">                            <span class="keyword">null</span> : xp.left;</span><br><span class="line">                    &#125;</span><br><span class="line">                    <span class="keyword">if</span> (xpl != <span class="keyword">null</span>) &#123;</span><br><span class="line">                        xpl.red = (xp == <span class="keyword">null</span>) ? <span class="keyword">false</span> : xp.red;</span><br><span class="line">                        <span class="keyword">if</span> ((sl = xpl.left) != <span class="keyword">null</span>)</span><br><span class="line">                            sl.red = <span class="keyword">false</span>;</span><br><span class="line">                    &#125;</span><br><span class="line">                    <span class="keyword">if</span> (xp != <span class="keyword">null</span>) &#123;</span><br><span class="line">                        xp.red = <span class="keyword">false</span>;</span><br><span class="line">                        root = rotateRight(root, xp);</span><br><span class="line">                    &#125;</span><br><span class="line">                    x = root;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="重写HashCode-方法和Equals-方法"><a href="#重写HashCode-方法和Equals-方法" class="headerlink" title="重写HashCode()方法和Equals()方法"></a>重写HashCode()方法和Equals()方法</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Prediction.java</span></span><br><span class="line"><span class="keyword">import</span> java.util.Random;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Prediction</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Random rand = <span class="keyword">new</span> Random(<span class="number">47</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">boolean</span> shadow = rand.nextDouble() &gt; <span class="number">0.5</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">toString</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (shadow) &#123; </span><br><span class="line">            <span class="keyword">return</span> <span class="string">&quot;Six more weeks of Winner!&quot;</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="string">&quot;Early Spring&quot;</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Groundhog.java</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Groundhog</span> </span>&#123;</span><br><span class="line">    <span class="keyword">protected</span> <span class="keyword">int</span> number;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Groundhog</span><span class="params">(<span class="keyword">int</span> n)</span> </span>&#123;</span><br><span class="line">        number = n;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">toString</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;Groundhog #&quot;</span> + number;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// SpringDetector.java</span></span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Constructor;</span><br><span class="line"><span class="keyword">import</span> java.util.HashMap;</span><br><span class="line"><span class="keyword">import</span> java.util.Map;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SpringDetector</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 利用反射机制获取构造函数</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> &lt;T extends Groundhog&gt;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">detectSpring</span><span class="params">(Class&lt;T&gt; type)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        Constructor&lt;T&gt; ghog = type.getConstructor(<span class="keyword">int</span>.class);</span><br><span class="line"></span><br><span class="line">        Map&lt;Groundhog, Prediction&gt; map = <span class="keyword">new</span> HashMap&lt;Groundhog, Prediction&gt;();</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">10</span>; i++) &#123;</span><br><span class="line">            map.put(ghog.newInstance(i), <span class="keyword">new</span> Prediction());</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        System.out.println(<span class="string">&quot;MAP&quot;</span> + map);</span><br><span class="line"></span><br><span class="line">        Groundhog groundhog = ghog.newInstance(<span class="number">3</span>);</span><br><span class="line"></span><br><span class="line">        System.out.println(<span class="string">&quot;Looking up prediction for&quot;</span> + groundhog);</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span> (map.containsKey(groundhog)) &#123;</span><br><span class="line">            System.out.println(map.get(groundhog));</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            System.out.println(<span class="string">&quot;Key not found:&quot;</span> + groundhog);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        detectSpring(Groundhog.class);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Output:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">MAP&#123;Groundhog #1=Six more weeks of Winner!, Groundhog #4=Six more weeks of Winner!, Groundhog #5=Early Spring, Groundhog #3=Early Spring, Groundhog #8=Six more weeks of Winner!, Groundhog #7=Early Spring, Groundhog #0=Six more weeks of Winner!, Groundhog #2=Early Spring, Groundhog #9=Six more weeks of Winner!, Groundhog #6=Early Spring&#125;</span><br><span class="line">Looking up prediction forGroundhog #3</span><br><span class="line">Key not found:Groundhog #3</span><br></pre></td></tr></table></figure>
+<p>Groundhog默认调用的是基类Object的hashCode方法，默认使用的是对象的地址计算的散列码。同时只重写hashCode()方法是不够的，还需要重写equals()方法。</p>
+<blockquote>
+<p><em>补充一句，hashCode()是基类Object的方法，所有Java对象都能产生散列码。</em></p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Groundhog2.java</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Groundhog2</span> <span class="keyword">extends</span> <span class="title">Groundhog</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Groundhog2</span><span class="params">(<span class="keyword">int</span> n)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(n);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">hashCode</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> number;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">equals</span><span class="params">(Object object)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> object <span class="keyword">instanceof</span> Groundhog2 &amp;&amp; (number == ((Groundhog2)object).number);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// SpringDetector2.java</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SpringDetector2</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        SpringDetector.detectSpring(Groundhog2.class);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Output:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">MAP&#123;Groundhog #0=Six more weeks of Winner!, Groundhog #1=Six more weeks of Winner!, Groundhog #2=Early Spring, Groundhog #3=Early Spring, Groundhog #4=Six more weeks of Winner!, Groundhog #5=Early Spring, Groundhog #6=Early Spring, Groundhog #7=Early Spring, Groundhog #8=Six more weeks of Winner!, Groundhog #9=Six more weeks of Winner!&#125;</span><br><span class="line">Looking up prediction forGroundhog #3</span><br><span class="line">Early Spring</span><br></pre></td></tr></table></figure>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Java/" rel="tag"># Java</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2019/02/27/CentOS%E5%AE%89%E8%A3%85MySQL8/" rel="prev" title="CentOS安装MySQL 8.0">
+      <i class="fa fa-chevron-left"></i> CentOS安装MySQL 8.0
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2019/09/09/JAVA%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86-Map/" rel="next" title="JAVA基础知识-Map">
+      JAVA基础知识-Map <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B8%B8%E7%94%A8%E7%9A%84%E9%80%9A%E9%85%8D%E7%AC%A6"><span class="nav-number">1.</span> <span class="nav-text">常用的通配符</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RBT-%E7%BA%A2%E9%BB%91%E6%A0%91"><span class="nav-number">2.</span> <span class="nav-text">RBT(红黑树)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#AVL-%E8%87%AA%E5%B9%B3%E8%A1%A1%E4%BA%8C%E5%8F%89%E6%9F%A5%E6%89%BE%E6%A0%91"><span class="nav-number">3.</span> <span class="nav-text">AVL(自平衡二叉查找树)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RBT%E5%92%8CAVL"><span class="nav-number">4.</span> <span class="nav-text">RBT和AVL</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#JAVA-%E4%B8%AD%E7%BA%A2%E9%BB%91%E6%A0%91%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="nav-number">5.</span> <span class="nav-text">JAVA 中红黑树的实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%87%8D%E5%86%99HashCode-%E6%96%B9%E6%B3%95%E5%92%8CEquals-%E6%96%B9%E6%B3%95"><span class="nav-number">6.</span> <span class="nav-text">重写HashCode()方法和Equals()方法</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">LEEZY</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">37</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">LEEZY</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

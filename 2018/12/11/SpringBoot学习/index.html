@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.leezy.top","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="Spring Boot makes it easy to create stand-alone, production-grade Spring-based Applications that you can run.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SpringBoot学习">
+<meta property="og:url" content="https://www.leezy.top/2018/12/11/SpringBoot%E5%AD%A6%E4%B9%A0/index.html">
+<meta property="og:site_name" content="SAKURA">
+<meta property="og:description" content="Spring Boot makes it easy to create stand-alone, production-grade Spring-based Applications that you can run.">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2018-12-11T02:34:25.000Z">
+<meta property="article:modified_time" content="2021-12-08T14:26:00.360Z">
+<meta property="article:author" content="LEEZY">
+<meta property="article:tag" content="SpringBoot">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://www.leezy.top/2018/12/11/SpringBoot%E5%AD%A6%E4%B9%A0/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>SpringBoot学习 | SAKURA</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">SAKURA</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://www.leezy.top/2018/12/11/SpringBoot%E5%AD%A6%E4%B9%A0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="LEEZY">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="SAKURA">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          SpringBoot学习
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-12-11 10:34:25" itemprop="dateCreated datePublished" datetime="2018-12-11T10:34:25+08:00">2018-12-11</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-12-08 22:26:00" itemprop="dateModified" datetime="2021-12-08T22:26:00+08:00">2021-12-08</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>Spring Boot makes it easy to create stand-alone, production-grade Spring-based Applications that you can run.</p>
+<span id="more"></span>
+
+<h2 id="1-常见注解"><a href="#1-常见注解" class="headerlink" title="1. 常见注解"></a>1. 常见注解</h2><h3 id="RequestMapping-GetMapping-amp-PostMapping"><a href="#RequestMapping-GetMapping-amp-PostMapping" class="headerlink" title="@RequestMapping (@GetMapping &amp; @PostMapping)"></a>@RequestMapping (@GetMapping &amp; @PostMapping)</h3><p>The @RequestMapping annotation provides “routing” information. It tells Spring that any HTTP request with the / path should be mapped to the home method.<br>@GetMapping是一个组合注解，是@RequestMapping(method = RequestMethod.GET)的缩写。<br>@PostMapping是一个组合注解，是@RequestMapping(method = RequestMethod.POST)的缩写。</p>
+<h3 id="RestController"><a href="#RestController" class="headerlink" title="@RestController"></a>@RestController</h3><p>The @RestController annotation tells Spring to render the resulting string directly back to the caller.<br>等价于 @Controller + @ResponseBody,为了使Http请求返回数据格式为json格式。</p>
+<h3 id="EnableAutoConfiguration"><a href="#EnableAutoConfiguration" class="headerlink" title="@EnableAutoConfiguration"></a>@EnableAutoConfiguration</h3><p>Since spring-boot-starter-web added Tomcat and Spring MVC, the auto-configuration assumes that you are developing a web application and sets up Spring accordingly.</p>
+<h3 id="ConditionalOnProperty"><a href="#ConditionalOnProperty" class="headerlink" title="@ConditionalOnProperty"></a>@ConditionalOnProperty</h3><p>可以用来控制配置是否生效。</p>
+<h3 id="SpringBootApplication"><a href="#SpringBootApplication" class="headerlink" title="@SpringBootApplication"></a>@SpringBootApplication</h3><p>The @SpringBootApplication annotation is often placed on your main class, and it implicitly defines a base “search package” for certain items. same as @Configuration,@EnableAutoConfiguration,@ComponentScan.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.example.myapplication;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.springframework.boot.SpringApplication;</span><br><span class="line"><span class="keyword">import</span> org.springframework.boot.autoconfigure.SpringBootApplication;</span><br><span class="line"></span><br><span class="line"><span class="meta">@SpringBootApplication</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Application</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">		SpringApplication.run(Application.class, args);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="Configuration"><a href="#Configuration" class="headerlink" title="@Configuration"></a>@Configuration</h3><p>Declare the configuration Classes.</p>
+<h3 id="EnableAutoConfiguration-1"><a href="#EnableAutoConfiguration-1" class="headerlink" title="@EnableAutoConfiguration"></a>@EnableAutoConfiguration</h3><p>If you find that specific auto-configuration classes that you do not want are being applied, you can use the exclude attribute of @EnableAutoConfiguration to disable them.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> org.springframework.boot.autoconfigure.*;</span><br><span class="line"><span class="keyword">import</span> org.springframework.boot.autoconfigure.jdbc.*;</span><br><span class="line"><span class="keyword">import</span> org.springframework.context.annotation.*;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="meta">@EnableAutoConfiguration(exclude=&#123;DataSourceAutoConfiguration.class&#125;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyConfiguration</span> </span>&#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="EnableConfigurationProperties-和-ConfigurationProperties"><a href="#EnableConfigurationProperties-和-ConfigurationProperties" class="headerlink" title="@EnableConfigurationProperties 和 @ConfigurationProperties"></a>@EnableConfigurationProperties 和 @ConfigurationProperties</h3><p>这两个注解的作用可以参见 Spring Boot <a target="_blank" rel="noopener" href="https://docs.spring.io/spring-boot/docs/2.1.0.RELEASE/reference/htmlsingle/[[boot-features-external-config-typesafe-configuration-properties]]">官方文档</a></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="meta">@ConfigurationProperties</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">UriConfigurationProperties</span> </span>&#123;</span><br><span class="line">	<span class="keyword">private</span> String httpbin = <span class="string">&quot;http://httpbin.org:80&quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getHttpbin</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> httpbin;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setHttpbin</span><span class="params">(String httpbin)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.httpbin = httpbin;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> org.spring.cloud.gateway;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.spring.cloud.gateway.properties.UriConfigurationProperties;</span><br><span class="line"><span class="keyword">import</span> org.springframework.boot.SpringApplication;</span><br><span class="line"><span class="keyword">import</span> org.springframework.boot.autoconfigure.SpringBootApplication;</span><br><span class="line"><span class="keyword">import</span> org.springframework.boot.context.properties.EnableConfigurationProperties;</span><br><span class="line"><span class="keyword">import</span> org.springframework.cloud.gateway.route.RouteLocator;</span><br><span class="line"><span class="keyword">import</span> org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;</span><br><span class="line"><span class="keyword">import</span> org.springframework.context.annotation.Bean;</span><br><span class="line"></span><br><span class="line"><span class="meta">@SpringBootApplication</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//@EnableConfigurationProperties(org.spring.cloud.gateway.properties.UriConfigurationProperties.class)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">GateWayApplication</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        SpringApplication.run(GateWayApplication.class, args);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> RouteLocator <span class="title">myRoutes</span><span class="params">(RouteLocatorBuilder builder, UriConfigurationProperties uriConfiguration)</span> </span>&#123;</span><br><span class="line">        String httpUri = uriConfiguration.getHttpbin();</span><br><span class="line">        <span class="keyword">return</span> builder.routes()</span><br><span class="line">            .route(p -&gt; p</span><br><span class="line">                .path(<span class="string">&quot;/get&quot;</span>)</span><br><span class="line">                .filters(f -&gt; f.addRequestHeader(<span class="string">&quot;Hello&quot;</span>, <span class="string">&quot;World&quot;</span>))</span><br><span class="line">                .uri(httpUri))</span><br><span class="line">            .route(p -&gt; p</span><br><span class="line">                .host(<span class="string">&quot;*.hystrix.com&quot;</span>)</span><br><span class="line">                .filters(f -&gt; f</span><br><span class="line">                    .hystrix(config -&gt; config</span><br><span class="line">                        .setName(<span class="string">&quot;mycmd&quot;</span>)</span><br><span class="line">                        .setFallbackUri(<span class="string">&quot;forward:/fallback&quot;</span>)))</span><br><span class="line">                .uri(httpUri))</span><br><span class="line">            .build();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上述两个文件位于两个包下，如果在第一个文件中使用了@Component，则在第二个文件中就不能再使用@EnableConfigurationProperties注解，否则将会报错，提示有两个Bean。<br>如果第一个文件没有使用@Component则第二个文件可以将注释去掉。</p>
+<p><strong>单元测试常用注解</strong></p>
+<h3 id="RunWith-SpringJUnit4ClassRunner-class"><a href="#RunWith-SpringJUnit4ClassRunner-class" class="headerlink" title="@RunWith(SpringJUnit4ClassRunner.class)"></a>@RunWith(SpringJUnit4ClassRunner.class)</h3><p>引入Spring对JUnit4的支持。</p>
+<h3 id="SpringApplicationConfiguration-classes-HelloApplication-class"><a href="#SpringApplicationConfiguration-classes-HelloApplication-class" class="headerlink" title="@SpringApplicationConfiguration(classes = HelloApplication.class)"></a>@SpringApplicationConfiguration(classes = HelloApplication.class)</h3><p>指定SpringBoot的启动类</p>
+<h3 id="WebAppConfiguration"><a href="#WebAppConfiguration" class="headerlink" title="@WebAppConfiguration"></a>@WebAppConfiguration</h3><p>开启Web应用配置，用于模拟ServletContext</p>
+<h3 id="Before-amp-Test-amp-After"><a href="#Before-amp-Test-amp-After" class="headerlink" title="@Before &amp; @Test &amp; @After"></a>@Before &amp; @Test &amp; @After</h3><p>@Before：JUnit中定义在测试用例@Test内容执行前预加载的内容，同理判断。</p>
+<h2 id="2-Starter-POMs"><a href="#2-Starter-POMs" class="headerlink" title="2. Starter POMs"></a>2. Starter POMs</h2><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter-actuator<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>命名规则都是spring-boot-starter-<em>，</em>代表一个特别的应用功能模块。</p>
+<h3 id="spring-boot-starter-web"><a href="#spring-boot-starter-web" class="headerlink" title="spring-boot-starter-web"></a>spring-boot-starter-web</h3><p>全栈Web开发模块，包含嵌入式的Tomcat、SpringMVC</p>
+<h3 id="spring-boot-starter-test"><a href="#spring-boot-starter-test" class="headerlink" title="spring-boot-starter-test"></a>spring-boot-starter-test</h3><p>包含Junit、Hamcrest、Mockito</p>
+<h3 id="spring-boot-starter-actuator"><a href="#spring-boot-starter-actuator" class="headerlink" title="spring-boot-starter-actuator"></a>spring-boot-starter-actuator</h3><p>为SpringBoot构建的应用提供一系列用于监控的端点。<br>访问：<a target="_blank" rel="noopener" href="http://127.0.0.1:8080/actuator">http://127.0.0.1:8080/actuator</a><br>可以看到输出了如下JSON文件：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">&quot;_links&quot;</span>: &#123;</span><br><span class="line">        <span class="attr">&quot;self&quot;</span>: &#123;</span><br><span class="line">            <span class="attr">&quot;href&quot;</span>: <span class="string">&quot;http://127.0.0.1:8080/actuator&quot;</span>,</span><br><span class="line">            <span class="attr">&quot;templated&quot;</span>: <span class="literal">false</span></span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="attr">&quot;health&quot;</span>: &#123;</span><br><span class="line">            <span class="attr">&quot;href&quot;</span>: <span class="string">&quot;http://127.0.0.1:8080/actuator/health&quot;</span>,</span><br><span class="line">            <span class="attr">&quot;templated&quot;</span>: <span class="literal">false</span></span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="attr">&quot;health-component&quot;</span>: &#123;</span><br><span class="line">            <span class="attr">&quot;href&quot;</span>: <span class="string">&quot;http://127.0.0.1:8080/actuator/health/&#123;component&#125;&quot;</span>,</span><br><span class="line">            <span class="attr">&quot;templated&quot;</span>: <span class="literal">true</span></span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="attr">&quot;health-component-instance&quot;</span>: &#123;</span><br><span class="line">            <span class="attr">&quot;href&quot;</span>: <span class="string">&quot;http://127.0.0.1:8080/actuator/health/&#123;component&#125;/&#123;instance&#125;&quot;</span>,</span><br><span class="line">            <span class="attr">&quot;templated&quot;</span>: <span class="literal">true</span></span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="attr">&quot;info&quot;</span>: &#123;</span><br><span class="line">            <span class="attr">&quot;href&quot;</span>: <span class="string">&quot;http://127.0.0.1:8080/actuator/info&quot;</span>,</span><br><span class="line">            <span class="attr">&quot;templated&quot;</span>: <span class="literal">false</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="spring-boot-devtools"><a href="#spring-boot-devtools" class="headerlink" title="spring-boot-devtools"></a>spring-boot-devtools</h3><p>(1) Property Defaults<br>(2) Automatic Restart<br>(3) LiveReload<br>(4) Global Settings<br>(5) Remote Applications</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-devtools<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">optional</span>&gt;</span>true<span class="tag">&lt;/<span class="name">optional</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="配置文件"><a href="#配置文件" class="headerlink" title="配置文件"></a>配置文件</h3><p>SpringBoot的默认配置文件位置是src/main/resources/application.properties.</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- application.properties --&gt;</span></span><br><span class="line">book.name=JAVA编程思想</span><br><span class="line">book.author=Bruce Eckel</span><br></pre></td></tr></table></figure>
+<p>应用中可以使用 @Vlaue注解来加载这些自定义的参数</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Book</span> </span>&#123;</span><br><span class="line">	<span class="meta">@Value(&quot;$&#123;book.name&#125;&quot;)</span></span><br><span class="line">	<span class="keyword">private</span> String name;</span><br><span class="line">	<span class="meta">@value(&quot;$&#123;book.author&#125;&quot;)</span></span><br><span class="line">	<span class="keyword">private</span> String author;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Java代码中引用有以下两种方式：</p>
+<ol>
+<li>PlaceHolder方式 ${…}</li>
+<li>SpEL表达式 #{…}</li>
+</ol>
+<p>通过application-{profile}多环境配置文件：<br>application-dev.properties:开发环境<br>application-test.properties:测试环境<br>application-prod.properties:生产环境<br>在application.properties中的spring.profiles.active属性来设置。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">// 调用测试环境</span><br><span class="line">spring.profiles.active = test;</span><br></pre></td></tr></table></figure>
+<p>在采用java -jar xxx.jar 形式运行项目时，”–”就是对application.properties中的属性值进行赋值的标识。<br>配置文件的优先级顺序如下：<br>命令行输入 &gt; 包外 &gt; 包内<br>所以可以在利用这一点来对配置进行快速准确的更改。</p>
+<h3 id="spring-factories文件"><a href="#spring-factories文件" class="headerlink" title="spring.factories文件"></a>spring.factories文件</h3><p>Spring Factories实现原理(package org.springframework.core.io.support包下的SpringFactoriesLoader.class文件;)<br>Spring 容器初始化时会加载该文件声明的类，我们可以通过@SpringBootApplication-&gt;@EnableAutoConfiguration-&gt;AutoConfigurationImportSelector-&gt;getCandidateConfigurations-&gt;SpringFactoriesLoader<br>spring-core包里定义了SpringFactoriesLoader类，这个类实现了检索META-INF/spring.factories文件，并获取指定接口的配置的功能。在这个类中定义了两个对外的方法：</p>
+<p>loadFactories: 根据接口类获取其实现类的实例，这个方法返回的是对象列表。<br>loadFactoryNames: 根据接口获取其接口类的名称，这个方法返回的是类名的列表。</p>
+<h3 id="bootstrap-yml和appllication-yml的区别"><a href="#bootstrap-yml和appllication-yml的区别" class="headerlink" title="bootstrap.yml和appllication.yml的区别"></a>bootstrap.yml和appllication.yml的区别</h3><p>bootstrap.yml加载（父SpringApplicationContext）顺序在application.yml之前，用于应用程序上下文的引导阶段。用于指定spring.application.name和spring.cloud.config.server.git.uri以及一些加密和解密信息。<br>eg：Spring Cloud Config 配置中心再使用时，通常将访问远程文件配置信息写在bootstrap.yml文件中。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/SpringBoot/" rel="tag"># SpringBoot</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/11/26/WebService%E5%AD%A6%E4%B9%A0/" rel="prev" title="WebService学习">
+      <i class="fa fa-chevron-left"></i> WebService学习
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/12/18/SpringCloud%E5%AD%A6%E4%B9%A0/" rel="next" title="《重新定义SpringCloud实战》读书笔记">
+      《重新定义SpringCloud实战》读书笔记 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E5%B8%B8%E8%A7%81%E6%B3%A8%E8%A7%A3"><span class="nav-number">1.</span> <span class="nav-text">1. 常见注解</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#RequestMapping-GetMapping-amp-PostMapping"><span class="nav-number">1.1.</span> <span class="nav-text">@RequestMapping (@GetMapping &amp; @PostMapping)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RestController"><span class="nav-number">1.2.</span> <span class="nav-text">@RestController</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#EnableAutoConfiguration"><span class="nav-number">1.3.</span> <span class="nav-text">@EnableAutoConfiguration</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ConditionalOnProperty"><span class="nav-number">1.4.</span> <span class="nav-text">@ConditionalOnProperty</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SpringBootApplication"><span class="nav-number">1.5.</span> <span class="nav-text">@SpringBootApplication</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Configuration"><span class="nav-number">1.6.</span> <span class="nav-text">@Configuration</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#EnableAutoConfiguration-1"><span class="nav-number">1.7.</span> <span class="nav-text">@EnableAutoConfiguration</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#EnableConfigurationProperties-%E5%92%8C-ConfigurationProperties"><span class="nav-number">1.8.</span> <span class="nav-text">@EnableConfigurationProperties 和 @ConfigurationProperties</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RunWith-SpringJUnit4ClassRunner-class"><span class="nav-number">1.9.</span> <span class="nav-text">@RunWith(SpringJUnit4ClassRunner.class)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SpringApplicationConfiguration-classes-HelloApplication-class"><span class="nav-number">1.10.</span> <span class="nav-text">@SpringApplicationConfiguration(classes &#x3D; HelloApplication.class)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#WebAppConfiguration"><span class="nav-number">1.11.</span> <span class="nav-text">@WebAppConfiguration</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Before-amp-Test-amp-After"><span class="nav-number">1.12.</span> <span class="nav-text">@Before &amp; @Test &amp; @After</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-Starter-POMs"><span class="nav-number">2.</span> <span class="nav-text">2. Starter POMs</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#spring-boot-starter-web"><span class="nav-number">2.1.</span> <span class="nav-text">spring-boot-starter-web</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#spring-boot-starter-test"><span class="nav-number">2.2.</span> <span class="nav-text">spring-boot-starter-test</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#spring-boot-starter-actuator"><span class="nav-number">2.3.</span> <span class="nav-text">spring-boot-starter-actuator</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#spring-boot-devtools"><span class="nav-number">2.4.</span> <span class="nav-text">spring-boot-devtools</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="nav-number">2.5.</span> <span class="nav-text">配置文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#spring-factories%E6%96%87%E4%BB%B6"><span class="nav-number">2.6.</span> <span class="nav-text">spring.factories文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#bootstrap-yml%E5%92%8Cappllication-yml%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="nav-number">2.7.</span> <span class="nav-text">bootstrap.yml和appllication.yml的区别</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">LEEZY</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">37</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">LEEZY</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
